@@ -53,7 +53,7 @@ export default function HomeScreen({ products, onSelectCake, setCurrentTab }: Ho
           <div className="relative z-10 max-w-2xl px-6 md:px-16 space-y-6 text-white py-12">
             <div className="inline-flex items-center gap-2 bg-brand-primary-container/60 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 text-brand-primary-fixed text-xs font-semibold tracking-widest uppercase">
               <Sparkles className="w-3.5 h-3.5 text-pink-300" />
-              Exquisite Marylebone Boutique
+              Official Nawala, Sri Lanka Boutique
             </div>
             
             <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-semibold leading-[1.1] tracking-tight">
@@ -243,10 +243,10 @@ export default function HomeScreen({ products, onSelectCake, setCurrentTab }: Ho
                   
                   <div className="flex justify-between items-center pt-2 border-t border-brand-surface-low">
                     <span className="text-xs font-semibold uppercase tracking-wider text-brand-secondary">
-                      Starting size
+                      Starting price
                     </span>
                     <span className="font-serif font-bold text-brand-primary text-base">
-                      £{cake.price.toFixed(2)}
+                      Rs. {cake.price.toLocaleString()}
                     </span>
                   </div>
                 </div>
@@ -301,7 +301,7 @@ export default function HomeScreen({ products, onSelectCake, setCurrentTab }: Ho
             />
             {/* Elegant transparent overlay with subtitle */}
             <div className="absolute bottom-4 right-4 bg-brand-on-surface/90 text-white font-mono text-[10px] tracking-widest uppercase p-3 rounded-lg border border-white/10 backdrop-blur-sm">
-              Marylebone Baking Lab • Batch Assembly
+              Nawala Baking Lab • Cake Conception
             </div>
           </div>
 
@@ -312,7 +312,7 @@ export default function HomeScreen({ products, onSelectCake, setCurrentTab }: Ho
       <section className="w-full px-5 md:px-[64px] max-w-[1280px] mx-auto text-center space-y-10">
         <div className="space-y-2">
           <p className="text-brand-primary text-xs font-bold tracking-widest uppercase">The Experience</p>
-          <h2 className="font-serif text-3xl text-brand-on-surface font-semibold">Voices from Marylebone</h2>
+          <h2 className="font-serif text-3xl text-brand-on-surface font-semibold">Voices from Colombo</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -321,11 +321,11 @@ export default function HomeScreen({ products, onSelectCake, setCurrentTab }: Ho
               {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 text-brand-primary fill-brand-primary" />)}
             </div>
             <p className="text-brand-on-surface-variant text-xs font-medium leading-relaxed">
-              "The Midnight Truffle redefined dark chocolate for me. Not clawing but deeply fragrant. We ordered the 10" edition, and our Marylebone guests were fully mesmerized."
+              "The Double Chocolate Fudge Cake redefined chocolate for me. Not clawing but deeply fragrant. We ordered the 1.5kg edition, and our Nawala guests were fully mesmerized."
             </p>
             <div>
-              <span className="block font-serif font-bold text-xs text-brand-primary">Charlotte Auden</span>
-              <span className="text-[10px] text-brand-secondary font-sans font-semibold tracking-wider uppercase">Marylebone</span>
+              <span className="block font-serif font-bold text-xs text-brand-primary">Charmaine de Silva</span>
+              <span className="text-[10px] text-brand-secondary font-sans font-semibold tracking-wider uppercase">Nawala</span>
             </div>
           </div>
 
@@ -334,11 +334,11 @@ export default function HomeScreen({ products, onSelectCake, setCurrentTab }: Ho
               {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 text-brand-primary fill-brand-primary" />)}
             </div>
             <p className="text-brand-on-surface-variant text-xs font-medium leading-relaxed">
-              "Lemon Elderflower is incredibly whimsical. Every forkful has the true lavender herbal touch. The buttercream is so light, it practically dissolves with the elderflower."
+              "Classic Ribbon Cake is incredibly whimsical. Every forkful has the true almond buttery touch. The buttercream is so light, it practically dissolves with the soft sponge."
             </p>
             <div>
               <span className="block font-serif font-bold text-xs text-brand-primary">Dr. Alistair Sterling</span>
-              <span className="text-[10px] text-brand-secondary font-sans font-semibold tracking-wider uppercase">Belgravia</span>
+              <span className="text-[10px] text-brand-secondary font-sans font-semibold tracking-wider uppercase">Rajagiriya</span>
             </div>
           </div>
 
@@ -351,7 +351,7 @@ export default function HomeScreen({ products, onSelectCake, setCurrentTab }: Ho
             </p>
             <div>
               <span className="block font-serif font-bold text-xs text-brand-primary">Victoria Hamilton</span>
-              <span className="text-[10px] text-brand-secondary font-sans font-semibold tracking-wider uppercase">Kensington</span>
+              <span className="text-[10px] text-brand-secondary font-sans font-semibold tracking-wider uppercase">Nugegoda</span>
             </div>
           </div>
         </div>
@@ -367,7 +367,7 @@ export default function HomeScreen({ products, onSelectCake, setCurrentTab }: Ho
           <div className="relative z-10 max-w-lg mx-auto space-y-4">
             <h2 className="font-serif text-2xl md:text-3xl font-semibold">Join The Baker’s Journal</h2>
             <p className="text-white/85 text-xs font-medium leading-relaxed px-4">
-              Receive direct releases of seasonal botanical designs, holiday gift collections, and invitations to our Marylebone tasting masterclasses.
+              Receive direct releases of seasonal botanical designs, holiday gift collections, and invitations to our Nawala tasting masterclasses.
             </p>
 
             {subscribed ? (

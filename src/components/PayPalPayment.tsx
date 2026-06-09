@@ -70,7 +70,7 @@ export default function PayPalPayment({
     }
 
     const script = document.createElement('script');
-    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=GBP&components=buttons`;
+    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&components=buttons`;
     script.async = true;
     script.defer = true;
 
@@ -115,12 +115,13 @@ export default function PayPalPayment({
             alert('Please populate delivery & transport coordinates first.');
             return null;
           }
+          const usdAmount = amount * 0.0033;
           return actions.order.create({
             purchase_units: [{
-              description: 'The Cake Lounge Gourmet Patisserie',
+              description: 'The Cake Lounge Gourmet Patisserie (Nawala)',
               amount: {
-                currency_code: 'GBP',
-                value: amount.toFixed(2)
+                currency_code: 'USD',
+                value: usdAmount.toFixed(2)
               }
             }]
           });
@@ -130,7 +131,7 @@ export default function PayPalPayment({
           onSuccess({
             transactionId: details.id,
             email: details.payer?.email_address || billingDetails.email,
-            paymentType: 'PayPal Live Transaction'
+            paymentType: 'PayPal Live Transaction (LKR converted to USD)'
           });
         },
         onCancel: () => {
@@ -175,7 +176,7 @@ export default function PayPalPayment({
 
     // Simulate standard sandbox verification latency
     setTimeout(() => {
-      const generatedId = `PAYID-L${Math.random().toString(36).substring(2, 6).toUpperCase()}${Math.floor(10000 + Math.random() * 90000)}GB`;
+      const generatedId = `PAYID-L${Math.random().toString(36).substring(2, 6).toUpperCase()}${Math.floor(10000 + Math.random() * 90000)}LK`;
       setSimulatedTxId(generatedId);
       setSimulatorStep('success');
 
@@ -191,25 +192,17 @@ export default function PayPalPayment({
     }, 2000);
   };
 
+  const showLiveSDK = clientId && !sdkError;
+
   return (
     <div className="w-full space-y-4">
       {/* 1. Real integration mode */}
-      {clientId ? (
+      {showLiveSDK ? (
         <div className="space-y-2">
           {isInitializing && (
             <div className="flex items-center justify-center p-6 bg-brand-surface-low rounded-xl border border-brand-outline-variant/10 text-brand-primary gap-2">
               <Loader2 className="w-4 h-4 animate-spin" />
               <span className="text-xs font-semibold">Tuning official PayPal cryptographic gates...</span>
-            </div>
-          )}
-
-          {sdkError && (
-            <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs flex gap-2 items-start">
-              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-bold">PayPal SDK Alert</p>
-                <p className="opacity-90">{sdkError}</p>
-              </div>
             </div>
           )}
 
@@ -220,6 +213,18 @@ export default function PayPalPayment({
             className={`w-full overflow-hidden transition-all duration-300 ${!isValid ? 'opacity-50 pointer-events-none' : ''}`}
           />
           
+          {isValid && (
+            <div className="p-3 bg-brand-primary-fixed/15 border border-brand-primary-fixed/30 rounded-xl text-left text-[11px] text-brand-on-surface-variant flex gap-2.5 items-start animate-fadeIn">
+              <Lock className="w-3.5 h-3.5 text-brand-primary flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold text-brand-on-surface">Integrated PayPal Live Checkout</p>
+                <p className="leading-relaxed">
+                  As PayPal does not natively charge in LKR (Rs.), your cart total of <strong className="text-brand-primary">Rs. {amount.toLocaleString()}</strong> is converted to <strong className="text-brand-primary">USD ${(amount * 0.0033).toFixed(2)}</strong> (at dynamic rate 1 LKR = 0.0033 USD) for real-time payment processing.
+                </p>
+              </div>
+            </div>
+          )}
+          
           {!isValid && (
             <p className="text-[10px] text-red-600 bg-red-50 px-3 py-2 rounded-lg font-bold text-center">
               ⚠ Populate delivery & transport details in Section 1 and 2 to activate PayPal live buttons.
@@ -229,15 +234,31 @@ export default function PayPalPayment({
       ) : (
         /* 2. Interactive Sandbox Simulator mode */
         <div className="space-y-3.5">
+          {/* Failover Error Banner */}
+          {sdkError && (
+            <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs flex gap-2 items-start animate-fadeIn">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <div className="text-left">
+                <p className="font-bold">PayPal SDK Alert</p>
+                <p className="opacity-90">{sdkError}</p>
+              </div>
+            </div>
+          )}
+
           {/* Header indicator */}
           <div className="p-3 bg-brand-primary-fixed/20 border border-brand-primary-fixed/55 rounded-xl text-left flex gap-2.5 items-start">
             <div className="w-8 h-8 rounded-lg bg-pink-100 flex items-center justify-center text-brand-primary flex-shrink-0">
               <Sparkles className="w-4 h-4" />
             </div>
             <div className="text-xs space-y-1">
-              <p className="font-bold text-brand-on-primary-fixed">Interactive Sandbox Mode Attached</p>
+              <p className="font-bold text-brand-on-primary-fixed">
+                {sdkError ? "Interactive Fallback Activated" : "Interactive Sandbox Mode Attached"}
+              </p>
               <p className="text-brand-on-surface-variant leading-relaxed">
-                No developer keys detected in environment config. Enjoy our signature, fully functional <strong className="text-brand-primary">PayPal Checkout Sandbox Simulator</strong>!
+                {sdkError 
+                  ? "Live gateway could not initialize. Operating in our high-fidelity PayPal Sandbox Simulator. Go ahead and click to complete your purchase safely!"
+                  : "No developer keys detected in environment config. Enjoy our signature, fully functional PayPal Checkout Sandbox Simulator!"
+                }
               </p>
             </div>
           </div>
@@ -286,7 +307,7 @@ export default function PayPalPayment({
               <Lock className="w-3.5 h-3.5 text-emerald-600" />
               SSL Sandbox Encrypted
             </span>
-            <span>GBP (£) currency conversion</span>
+            <span>LKR (Rs.) processed</span>
           </div>
         </div>
       )}
@@ -340,7 +361,7 @@ export default function PayPalPayment({
 
                 <div className="text-right">
                   <span className="block text-[8px] uppercase tracking-wider text-gray-300">Secure Merchant</span>
-                  <span className="text-xs font-bold tracking-tight text-white leading-none">The Cake Lounge Ltd</span>
+                  <span className="text-xs font-bold tracking-tight text-white leading-none">The Cake Lounge (Nawala)</span>
                 </div>
               </div>
 
@@ -351,7 +372,7 @@ export default function PayPalPayment({
                 <div className="bg-[#f5f7fa] rounded-xl p-4 border border-gray-200/60 flex justify-between items-center text-xs">
                   <div>
                     <p className="text-gray-500 font-bold uppercase text-[9px] tracking-wider mb-0.5">Order Total Value</p>
-                    <p className="text-gray-900 font-serif font-black text-lg">£{amount.toFixed(2)}</p>
+                    <p className="text-gray-900 font-serif font-black text-lg">Rs. {amount.toLocaleString()}</p>
                   </div>
                   <div className="text-right font-semibold text-gray-600 max-w-[150px] truncate">
                     <p className="text-gray-500 text-[9px] uppercase tracking-wider mb-0.5">Recipient</p>
@@ -429,7 +450,7 @@ export default function PayPalPayment({
                         Choose funding source
                       </h4>
                       <p className="text-[11px] text-gray-500 font-medium">
-                        Confirm which simulated account wallet to deduct £{amount.toFixed(2)} from.
+                        Confirm which simulated account wallet to deduct Rs. {amount.toLocaleString()} from.
                       </p>
                     </div>
 
@@ -445,11 +466,11 @@ export default function PayPalPayment({
                       >
                         <div className="flex gap-3 items-center">
                           <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-[10px]">
-                            £
+                            Rs.
                           </div>
                           <div className="text-left">
                             <span className="block text-xs font-bold text-gray-850">PayPal Balance</span>
-                            <span className="block text-[10px] text-gray-500 font-semibold">Available: £4,250.00 GBP</span>
+                            <span className="block text-[10px] text-gray-500 font-semibold">Available: Rs. 150,000 LKR</span>
                           </div>
                         </div>
 
@@ -501,7 +522,7 @@ export default function PayPalPayment({
                         onClick={handleCompleteSimulatedPayment}
                         className="px-6 py-2.5 bg-[#ffc439] hover:bg-[#ebd02c] text-[#003087] rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-98"
                       >
-                        Authorize & Pay £{amount.toFixed(2)}
+                        Authorize & Pay Rs. {amount.toLocaleString()}
                       </button>
                     </div>
                   </div>

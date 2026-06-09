@@ -29,7 +29,7 @@ export default function AdminDashboard({
   // New product inputs state list
   const [prodName, setProdName] = useState('');
   const [prodCategory, setProdCategory] = useState('Cakes');
-  const [prodPrice, setProdPrice] = useState('45.00');
+  const [prodPrice, setProdPrice] = useState('3900');
   const [prodDesc, setProdDesc] = useState('');
   const [prodLongDesc, setProdLongDesc] = useState('');
   const [prodImage, setProdImage] = useState('https://lh3.googleusercontent.com/aida-public/AB6AXuD9xg23JS1m4efL9471QbGoCMXQ8bREBf4rmiEUsiiZ1DtA43Izo8whF4OBWlboGEe0Aa3nnYVteJ1aCUP2zV93ExluaKODbXHiKA8BhHAmdoUj2vY0_5o0KZ8wbdna2iNNELxvWFBr-TtUjk6Ukonssn9vTtAXuDLIn4nkCgVdSc1eDXVO1DgztvyqYOmBpw3u37mCTHGXsIPPaDEXOedqHrdX9SRPk5gmo21sPXS7YJukfAPHw1Wp_-UpKUB8jY99nr8F4-dV4bU');
@@ -52,7 +52,7 @@ export default function AdminDashboard({
     e.preventDefault();
     if (!prodName.trim()) return;
 
-    const parsedPrice = parseFloat(prodPrice) || 35.00;
+    const parsedPrice = parseFloat(prodPrice) || 3900.00;
     const generatedId = prodName.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-str0-9-]/g, '');
 
     const newProduct: CakeProduct = {
@@ -183,7 +183,7 @@ export default function AdminDashboard({
         <div>
           <div className="flex items-center gap-2 text-brand-primary">
             <Landmark className="w-5 h-5" />
-            <span className="font-mono text-xs font-bold uppercase tracking-widest">Marylebone Backoffice Gate</span>
+            <span className="font-mono text-xs font-bold uppercase tracking-widest">Nawala Backoffice Gate</span>
           </div>
           <h1 className="font-serif text-3xl md:text-4xl text-brand-on-surface font-semibold mt-1">
             The Baker's Dashboard
@@ -262,7 +262,7 @@ export default function AdminDashboard({
           <div className="space-y-1">
             <span className="block text-[10px] font-bold text-brand-on-surface-variant uppercase tracking-wider">Total Realized Sales</span>
             <p className="font-serif text-2xl font-bold text-brand-primary" id="kpi-delivered-revenue">
-              £{totalSales.toFixed(2)}
+              Rs. {totalSales.toLocaleString()}
             </p>
             <span className="block text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md w-max">
               Delivered Orders Only
@@ -523,7 +523,7 @@ export default function AdminDashboard({
 
                     {/* Cost */}
                     <td className="py-4 px-4 font-mono font-bold text-brand-primary">
-                      £{order.total.toFixed(2)}
+                      Rs. {order.total.toLocaleString()}
                     </td>
 
                     {/* Status badge */}
@@ -583,7 +583,7 @@ export default function AdminDashboard({
       {activeMenu === 'analytics' && (
         <div className="bg-white p-6 rounded-2xl border border-brand-outline-variant/15 shadow-sm space-y-6 animate-fadeIn">
           <div className="space-y-1">
-            <h3 className="font-serif text-lg font-semibold text-brand-primary">Marylebone Footfall & Baking Volume</h3>
+            <h3 className="font-serif text-lg font-semibold text-brand-primary">Nawala Footfall & Baking Volume</h3>
             <p className="text-brand-on-surface-variant text-xs font-medium">Boutique operational insights compared across active morning bakes.</p>
           </div>
 
@@ -622,9 +622,9 @@ export default function AdminDashboard({
               
               <div className="space-y-4 pt-4">
                 {[
-                  { name: 'Artisan Cakes Menu', ratio: '54%', cost: '£1,420', bg: 'bg-brand-primary' },
-                  { name: 'Premium Collections', ratio: '28%', cost: '£730', bg: 'bg-brand-primary-container' },
-                  { name: 'Botanical Gifts & Macarons', ratio: '18%', cost: '£470', bg: 'bg-brand-secondary' }
+                  { name: 'Artisan Cakes Menu', ratio: '54%', cost: 'Rs. 320,000', bg: 'bg-brand-primary' },
+                  { name: 'Premium Collections', ratio: '28%', cost: 'Rs. 180,000', bg: 'bg-brand-primary-container' },
+                  { name: 'Botanical Gifts & Macarons', ratio: '18%', cost: 'Rs. 100,000', bg: 'bg-brand-secondary' }
                 ].map((item, idx) => (
                   <div key={idx} className="space-y-1.5">
                     <div className="flex justify-between items-center text-xs font-semibold">
@@ -691,7 +691,7 @@ export default function AdminDashboard({
                       {product.description}
                     </p>
                     <p className="text-xs font-mono font-bold text-brand-primary">
-                      £{product.price.toFixed(2)}
+                      Rs. {product.price.toLocaleString()}
                     </p>
                   </div>
 
@@ -744,10 +744,10 @@ export default function AdminDashboard({
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-[10px] text-brand-primary font-bold uppercase tracking-wider">Base Price (£) *</label>
+                  <label className="block text-[10px] text-brand-primary font-bold uppercase tracking-wider">Base Price (Rs.) *</label>
                   <input
                     type="number"
-                    step="0.01"
+                    step="1"
                     min="1"
                     required
                     value={prodPrice}

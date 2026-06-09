@@ -16,7 +16,7 @@ export default function ProductDetailScreen({ products, productId, onBackToStore
   // Find current product or default to first product
   const product = products.find(p => p.id === productId) || products[0];
 
-  const [selectedSize, setSelectedSize] = useState('6" (6-8 Servings)');
+  const [selectedSize, setSelectedSize] = useState('1.0 kg (6-8 Servings)');
   const [hasNote, setHasNote] = useState(false);
   const [noteText, setNoteText] = useState('');
   const [quantity, setQuantity] = useState(1);
@@ -29,27 +29,30 @@ export default function ProductDetailScreen({ products, productId, onBackToStore
   // Re-sync image when product changes
   useEffect(() => {
     setSelectedImage(product.image);
-    setSelectedSize(product.id === 'wedding-edit' ? 'Medium (30 count)' : '6" (6-8 Servings)');
+    setSelectedSize(
+      product.id === 'macaron-tasting-box' 
+        ? 'Standard Box of 12' 
+        : product.id === 'cupcake-party-pack' 
+        ? 'Box of 6' 
+        : '1.0 kg (6-8 Servings)'
+    );
     setQuantity(1);
     setHasNote(false);
     setNoteText('');
     setAddingState('idle');
   }, [product]);
 
-  const sizeOptions = product.id === 'wedding-edit' ? [
-    { label: 'Medium (30 count)', markup: 0 },
-    { label: 'Large (50 count)', markup: 60 }
-  ] : product.id === 'celebration-series' ? [
+  const sizeOptions = product.id === 'macaron-tasting-box' ? [
+    { label: 'Standard Box of 12', markup: 0 },
+    { label: 'Premium Box of 24', markup: 2600.00 }
+  ] : product.id === 'cupcake-party-pack' ? [
     { label: 'Box of 6', markup: 0 },
-    { label: 'Box of 12', markup: 25 },
-    { label: 'Box of 24', markup: 55 }
-  ] : product.id === 'gifting' ? [
-    { label: 'Standard Box of 8', markup: 0 },
-    { label: 'Premium Box of 16', markup: 18 }
+    { label: 'Box of 12', markup: 1800.00 },
+    { label: 'Box of 24', markup: 3400.00 }
   ] : [
-    { label: '6" (6-8 Servings)', markup: 0 },
-    { label: '8" (12-15 Servings)', markup: 22.00 },
-    { label: '10" (20-25 Servings)', markup: 54.00 }
+    { label: '1.0 kg (6-8 Servings)', markup: 0 },
+    { label: '1.5 kg (12-15 Servings)', markup: 1800.00 },
+    { label: '2.0 kg (20-25 Servings)', markup: 3600.00 }
   ];
 
   // Calculate dynamic price based on chosen size
@@ -116,7 +119,7 @@ export default function ProductDetailScreen({ products, productId, onBackToStore
   const faqItems = [
     {
       q: "Can I adjust my delivery date after placing an order?",
-      a: "Yes. As long as you submit an edit request via our Marylebone boutique workspace at least 48 hours prior to your scheduled slot, our kitchen team will shift the baking cycle without any extra penalty."
+      a: "Yes. As long as you submit an edit request via our Nawala boutique workspace at least 48 hours prior to your scheduled slot, our kitchen team will shift the baking cycle without any extra penalty."
     },
     {
       q: "Do you offer gluten-free or completely vegan alternatives?",
@@ -138,10 +141,10 @@ export default function ProductDetailScreen({ products, productId, onBackToStore
           className="group flex items-center gap-2 text-sm font-bold text-brand-primary hover:text-brand-primary-container transition-all cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          Back to Artisan Boutique
+          Back to Lounge Storefront
         </button>
         <div className="flex gap-4 font-mono text-[10px] text-brand-on-surface-variant font-semibold uppercase tracking-wider">
-          <span> Marylebone Kitchen Lab </span>
+          <span> Nawala Kitchen Lab </span>
           <span>•</span>
           <span className="text-brand-primary font-bold"> Status: Fresh Batch </span>
         </div>
@@ -199,7 +202,7 @@ export default function ProductDetailScreen({ products, productId, onBackToStore
                   ))}
                   <span className="px-3 py-1 bg-[#fff0f6] text-[#b01e3e] font-sans text-[9px] font-bold rounded-md flex items-center gap-1">
                     <ChefHat className="w-3 h-3" />
-                    Prepared in Marylebone boutique
+                    Baked in Nawala Lounge Lab
                   </span>
                 </div>
               </div>
@@ -222,8 +225,8 @@ export default function ProductDetailScreen({ products, productId, onBackToStore
             </h1>
             <div className="flex items-baseline justify-between">
               <p className="text-brand-on-surface-variant text-sm font-medium">Bespoke pricing</p>
-              <p className="font-serif text-3xl font-bold text-brand-primary">
-                £{totalPrice.toFixed(2)}
+              <p className="font-serif text-2xl font-bold text-brand-primary">
+                Rs. {totalPrice.toLocaleString()}
               </p>
             </div>
           </div>
@@ -249,7 +252,7 @@ export default function ProductDetailScreen({ products, productId, onBackToStore
                   >
                     <span>{option.label}</span>
                     <span className="font-mono text-xs text-brand-primary/80">
-                      {option.markup === 0 ? 'Base Price' : `+ £${option.markup.toFixed(2)}`}
+                      {option.markup === 0 ? 'Base Price' : `+ Rs. ${option.markup.toLocaleString()}`}
                     </span>
                   </button>
                 ))}
@@ -340,7 +343,7 @@ export default function ProductDetailScreen({ products, productId, onBackToStore
                 {addingState === 'idle' && (
                   <>
                     <Sparkles className="w-4 h-4 text-pink-200 animate-pulse" />
-                    Place in Shopping Bag • £{totalPrice.toFixed(2)}
+                    Place in Shopping Bag • Rs. {totalPrice.toLocaleString()}
                   </>
                 )}
 

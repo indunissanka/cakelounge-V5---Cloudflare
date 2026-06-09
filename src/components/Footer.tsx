@@ -97,16 +97,20 @@ export default function Footer({ setCurrentTab }: FooterProps) {
 
         {/* Col 4 */}
         <div className="space-y-4">
-          <h4 className="text-sm font-bold text-brand-primary uppercase tracking-wider">Artisanal Boutique</h4>
+          <h4 className="text-sm font-bold text-brand-primary uppercase tracking-wider">Lounge Boutique</h4>
           <p className="text-brand-on-surface-variant text-sm font-medium leading-relaxed">
-            128 Artisan Street<br />
-            Marylebone, London<br />
-            W1U 4BP
+            No. 188, Nawala Road<br />
+            Nawala 10120<br />
+            Sri Lanka
           </p>
+          <div className="text-xs text-brand-on-surface-variant space-y-1">
+            <p><span className="font-bold text-brand-primary">Hotline:</span> +94 77 722 5335</p>
+            <p><span className="font-bold text-brand-primary">Support:</span> sales@cakelounge.lk</p>
+          </div>
           <div className="pt-2 text-xs text-brand-on-surface-variant bg-white/40 p-3 rounded-lg border border-brand-outline-variant/20 inline-block">
             <span className="font-bold text-brand-primary uppercase tracking-wide block mb-1">Hours</span>
-            Mon - Sat: 09:00 - 18:00<br />
-            Sun: 10:00 - 16:00
+            Mon - Sat: 08:30 - 19:30<br />
+            Sun: 09:00 - 18:00
           </div>
         </div>
       </div>
@@ -114,7 +118,7 @@ export default function Footer({ setCurrentTab }: FooterProps) {
       {/* Bottom bar */}
       <div className="px-5 md:px-[64px] py-6 border-t border-brand-outline-variant/20 max-w-[1280px] mx-auto flex flex-col sm:flex-row justify-between items-center text-brand-on-surface-variant text-xs font-semibold tracking-wider gap-4">
         <div>
-          &copy; 2026 The Cake Lounge. Crafted with Precision in Marylebone, London.
+          &copy; 2026 The Cake Lounge. Handcrafted in Nawala, Colombo, Sri Lanka.
           <button 
             onClick={() => setCurrentTab('admin')}
             className="ml-2 opacity-40 hover:opacity-100 hover:text-brand-primary hover:underline transition-all cursor-pointer font-medium"

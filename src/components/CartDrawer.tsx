@@ -78,7 +78,7 @@ export default function CartDrawer({
                       {item.product.name}
                     </h4>
                     <span className="font-mono text-xs font-bold text-brand-primary whitespace-nowrap">
-                      £{(item.product.price * item.quantity).toFixed(2)}
+                      Rs. {(item.product.price * item.quantity).toLocaleString()}
                     </span>
                   </div>
 
@@ -140,7 +140,7 @@ export default function CartDrawer({
                 Subtotal
               </span>
               <span className="font-serif text-2xl font-bold text-brand-primary" id="cart-drawer-subtotal">
-                £{total.toFixed(2)}
+                Rs. {total.toLocaleString()}
               </span>
             </div>
 

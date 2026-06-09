@@ -76,7 +76,7 @@ export default function CheckoutScreen({ cart, onPlaceOrder, onBackToStore }: Ch
 
   // Financial calculations
   const subtotal = cart.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
-  const deliveryFee = subtotal > 120 ? 0 : 15.00; // Free delivery over £120
+  const deliveryFee = subtotal > 10000 ? 0 : 750.00; // Free delivery over Rs. 10,000
   
   const discountAmount = discountApplied ? (subtotal * discountPercent) : 0;
   const taxableAmount = subtotal - discountAmount;
@@ -118,7 +118,7 @@ export default function CheckoutScreen({ cart, onPlaceOrder, onBackToStore }: Ch
             Reservation Reference: {placedOrderRecord.id}
           </p>
           <p className="text-brand-on-surface-variant text-xs md:text-sm max-w-lg mx-auto leading-relaxed">
-            Thank you, <span className="font-bold text-brand-on-surface">{placedOrderRecord.customerName}</span>. Your bespoke order has been logged in our Marylebone master schedule. Our baking crew begins folding your sponge elements tomorrow morning at 05:00 AM.
+            Thank you, <span className="font-bold text-brand-on-surface">{placedOrderRecord.customerName}</span>. Your bespoke order has been logged in our Nawala master schedule. Our baking crew begins folding your sponge elements tomorrow morning at 05:00 AM.
           </p>
         </div>
 
@@ -139,7 +139,7 @@ export default function CheckoutScreen({ cart, onPlaceOrder, onBackToStore }: Ch
             </div>
             <div>
               <span className="block text-brand-on-surface-variant/75 text-[10px] font-bold uppercase tracking-wider">Total Charge</span>
-              <p className="text-brand-primary font-bold">£{placedOrderRecord.total.toFixed(2)}</p>
+              <p className="text-brand-primary font-bold">Rs. {placedOrderRecord.total.toLocaleString()}</p>
             </div>
             <div>
               <span className="block text-brand-on-surface-variant/75 text-[10px] font-bold uppercase tracking-wider">Notifications Email</span>
@@ -261,7 +261,7 @@ export default function CheckoutScreen({ cart, onPlaceOrder, onBackToStore }: Ch
                   <input
                     type="text"
                     required
-                    placeholder="e.g. London"
+                    placeholder="e.g. Colombo"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     className="w-full p-3 border border-brand-outline-variant/30 text-xs font-sans rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-primary bg-brand-surface-low/20"
@@ -272,7 +272,7 @@ export default function CheckoutScreen({ cart, onPlaceOrder, onBackToStore }: Ch
                   <input
                     type="text"
                     required
-                    placeholder="e.g. W1U 4BP"
+                    placeholder="e.g. 10120"
                     value={postalCode}
                     onChange={(e) => setPostalCode(e.target.value)}
                     className="w-full p-3 border border-brand-outline-variant/30 text-xs font-sans rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-primary bg-brand-surface-low/20"
@@ -366,7 +366,7 @@ export default function CheckoutScreen({ cart, onPlaceOrder, onBackToStore }: Ch
                           {item.product.name}
                         </p>
                         <span className="font-mono text-xs font-semibold text-brand-primary whitespace-nowrap">
-                          £{(item.product.price * item.quantity).toFixed(2)}
+                          Rs. {(item.product.price * item.quantity).toLocaleString()}
                         </span>
                       </div>
                       <p className="text-[10px] text-brand-on-surface-variant font-medium">
@@ -424,29 +424,29 @@ export default function CheckoutScreen({ cart, onPlaceOrder, onBackToStore }: Ch
               <div className="pt-4 border-t border-brand-surface-low space-y-2.5 font-sans font-medium text-xs text-brand-on-surface-variant">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span className="font-mono text-xs">£{subtotal.toFixed(2)}</span>
+                  <span className="font-mono text-xs">Rs. {subtotal.toLocaleString()}</span>
                 </div>
                 {discountApplied && (
                   <div className="flex justify-between text-emerald-600 font-semibold animate-fadeIn">
                     <span>Discount ({(discountPercent * 100)}%)</span>
-                    <span className="font-mono text-xs">- £{discountAmount.toFixed(2)}</span>
+                    <span className="font-mono text-xs">- Rs. {discountAmount.toLocaleString()}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
                   <span>Refrigerated transport couriers</span>
                   <span className="font-mono text-xs">
-                    {deliveryFee === 0 ? 'FREE' : `£${deliveryFee.toFixed(2)}`}
+                    {deliveryFee === 0 ? 'FREE' : `Rs. ${deliveryFee.toLocaleString()}`}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Luxury tax (9% VAT)</span>
-                  <span className="font-mono text-xs">£{tax.toFixed(2)}</span>
+                  <span className="font-mono text-xs">Rs. {tax.toLocaleString()}</span>
                 </div>
                 
                 <div className="flex justify-between items-baseline pt-4 border-t border-brand-surface-low text-brand-on-surface font-sans font-bold">
                   <span className="text-sm">Reservation Total</span>
                   <span className="font-serif text-2xl text-brand-primary" id="checkout-total-price">
-                    £{total.toFixed(2)}
+                    Rs. {total.toLocaleString()}
                   </span>
                 </div>
               </div>

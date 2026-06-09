@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-brand-primary: #501644;
+  --color-brand-primary-container: #6b2d5c;
+  --color-brand-primary-fixed: #ffd7ef;
+  --color-brand-on-primary-fixed: #3a0130;
+  
+  --color-brand-secondary: #635e53;
+  --color-brand-secondary-container: #e9e2d3;
+  --color-brand-on-secondary-container: #696458;
+  
+  --color-brand-surface: #fff8f5;
+  --color-brand-surface-low: #fbf2ed;
+  --color-brand-surface-container: #f5ece8;
+  --color-brand-surface-highest: #eae1dc;
+  
+  --color-brand-on-surface: #1f1b18;
+  --color-brand-on-surface-variant: #50434b;
+  --color-brand-outline: #82737b;
+  --color-brand-outline-variant: #d4c2cb;
+}
+
+/* Custom premium styles */
+.premium-shadow {
+  box-shadow: 0 4px 20px rgba(107, 45, 92, 0.08);
+}
+
+.premium-shadow-hover:hover {
+  box-shadow: 0 12px 30px rgba(107, 45, 92, 0.12);
+  transform: translateY(-4px);
+}
+
+.glass-morphism {
+  background: rgba(255, 248, 245, 0.8);
+  backdrop-filter: blur(12px);
+}
+
+.hide-scrollbar::-webkit-scrollbar { 
+  display: none; 
+}
+
+.hide-scrollbar { 
+  -ms-overflow-style: none; 
+  scrollbar-width: none; 
+}
+
+/* Base style resets */
+body {
+  background-color: var(--color-brand-surface);
+  color: var(--color-brand-on-surface);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+

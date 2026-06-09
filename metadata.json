@@ -1,0 +1,6 @@
+{
+  "name": "The Cake Lounge",
+  "description": "An exquisite, high-end artisanal bakery experience offering bespoke cake collections, smooth custom checkout, and an integrated real-time production admin dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

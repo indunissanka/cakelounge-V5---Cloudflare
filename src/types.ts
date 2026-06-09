@@ -56,3 +56,16 @@ export interface ScheduleItem {
   description: string;
   borderType: 'primary' | 'tertiary' | 'dim' | 'outline';
 }
+
+export interface Customer {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  password?: string; // Stored locally
+  createdAt: string;
+}
+

@@ -44,14 +44,19 @@ export default function PayPalPayment({
   const [simulatorStep, setSimulatorStep] = useState<'login' | 'select_funding' | 'processing' | 'success'>('login');
   
   // Simulated form credentials
-  const [paypalEmail, setPaypalEmail] = useState('buyer@cakelounge.com');
+  const [paypalEmail, setPaypalEmail] = useState('mark@sirilankan.com');
   const [paypalPassword, setPaypalPassword] = useState('SecretPastries2026');
   const [selectedFunding, setSelectedFunding] = useState<'balance' | 'linked_card'>('balance');
   const [fundingError, setFundingError] = useState<string | null>(null);
   const [simulatedTxId, setSimulatedTxId] = useState('');
 
   const paypalContainerRef = useRef<HTMLDivElement>(null);
-  const clientId = (import.meta as any).env.VITE_PAYPAL_CLIENT_ID || '';
+  const rawClientId = (import.meta as any).env?.VITE_PAYPAL_CLIENT_ID || '';
+  const clientId = typeof rawClientId === 'string' 
+    ? rawClientId.trim().replace(/^["']|["']$/g, '') 
+    : '';
+
+  const isIframe = typeof window !== 'undefined' && window.self !== window.top;
 
   // Load actual PayPal SDK if custom Client ID is available
   useEffect(() => {
@@ -166,7 +171,24 @@ export default function PayPalPayment({
       return;
     }
     setFundingError(null);
-    setSimulatorStep('select_funding');
+    setSimulatorStep('processing');
+
+    // Simulate sandbox verification latency and complete the transaction
+    setTimeout(() => {
+      const generatedId = `PAYID-L${Math.random().toString(36).substring(2, 6).toUpperCase()}${Math.floor(10000 + Math.random() * 90000)}LK`;
+      setSimulatedTxId(generatedId);
+      setSimulatorStep('success');
+
+      // Short delay for visual feedback before closing and returning success
+      setTimeout(() => {
+        onSuccess({
+          transactionId: generatedId,
+          email: paypalEmail,
+          paymentType: 'PayPal Sandbox Automated Engine'
+        });
+        setIsSimulatorOpen(false);
+      }, 1000);
+    }, 1500);
   };
 
   // Complete simulator payment
@@ -236,11 +258,31 @@ export default function PayPalPayment({
         <div className="space-y-3.5">
           {/* Failover Error Banner */}
           {sdkError && (
-            <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs flex gap-2 items-start animate-fadeIn">
-              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-              <div className="text-left">
-                <p className="font-bold">PayPal SDK Alert</p>
-                <p className="opacity-90">{sdkError}</p>
+            <div className="p-4 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl text-xs flex gap-3 items-start animate-fadeIn shadow-sm">
+              <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div className="text-left space-y-1.5 flex-1">
+                <p className="font-bold text-amber-800">PayPal Live Gateway Sandbox Loader</p>
+                <p className="opacity-90 leading-relaxed">{sdkError}</p>
+                
+                {isIframe && (
+                  <div className="mt-2.5 pt-2.5 border-t border-amber-200 text-[11px] text-amber-950 space-y-2 leading-relaxed">
+                    <p className="font-bold flex items-center gap-1.5 text-amber-900">
+                      <Laptop className="w-4 h-4 text-brand-primary" />
+                      Testing Inside the Google AI Studio Preview
+                    </p>
+                    <p>
+                      Because this app is currently rendered inside a sandboxed <code className="bg-amber-100 px-1 rounded text-red-700">&lt;iframe&gt;</code> element, modern browsers block external secure payment scripts (like the PayPal SDK) from accessing local state and executing scripts.
+                    </p>
+                    <div className="p-2.5 bg-white/70 rounded-lg border border-amber-200/50 space-y-1">
+                      <p className="font-semibold text-brand-primary flex items-center gap-1">
+                        🚀 To load the real live PayPal buttons:
+                      </p>
+                      <p className="text-[10.5px]">
+                        Click the <strong className="font-bold">"Open in New Tab" (↗)</strong> button in the top-right corner of your workspace preview. In a standard tab, the SDK initializes perfectly!
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

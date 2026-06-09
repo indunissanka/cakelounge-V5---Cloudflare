@@ -1,18 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   CreditCard, ShieldCheck, Tag, Info, 
   MapPin, CalendarDays, CheckCircle, Gift, Truck 
 } from 'lucide-react';
-import { CartItem, Order } from '../types';
+import { CartItem, Order, Customer } from '../types';
 import PayPalPayment from './PayPalPayment';
 
 interface CheckoutScreenProps {
   cart: CartItem[];
   onPlaceOrder: (order: Order) => void;
   onBackToStore: () => void;
+  currentUser?: Customer | null;
 }
 
-export default function CheckoutScreen({ cart, onPlaceOrder, onBackToStore }: CheckoutScreenProps) {
+export default function CheckoutScreen({ cart, onPlaceOrder, onBackToStore, currentUser = null }: CheckoutScreenProps) {
   // Coupon state
   const [promoCode, setPromoCode] = useState('');
   const [discountApplied, setDiscountApplied] = useState(false);
@@ -27,6 +28,19 @@ export default function CheckoutScreen({ cart, onPlaceOrder, onBackToStore }: Ch
   const [city, setCity] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [deliveryDate, setDeliveryDate] = useState('');
+
+  // Auto-fill coordinates if logged in
+  useEffect(() => {
+    if (currentUser) {
+      const parts = currentUser.name.trim().split(/\s+/);
+      setFirstName(parts[0] || '');
+      setLastName(parts.slice(1).join(' ') || '');
+      setEmail(currentUser.email || '');
+      setAddress(currentUser.address || '');
+      setCity(currentUser.city || '');
+      setPostalCode(currentUser.postalCode || '');
+    }
+  }, [currentUser]);
 
   // Finished success state
   const [placedOrderRecord, setPlacedOrderRecord] = useState<Order | null>(null);

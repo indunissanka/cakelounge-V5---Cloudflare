@@ -3,8 +3,8 @@ import { ShoppingBag, User, Menu, X, Landmark } from 'lucide-react';
 import { CartItem } from '../types';
 
 interface HeaderProps {
-  currentTab: 'home' | 'product-detail' | 'checkout' | 'admin';
-  setCurrentTab: (tab: 'home' | 'product-detail' | 'checkout' | 'admin') => void;
+  currentTab: 'home' | 'product-detail' | 'checkout' | 'admin' | 'profile';
+  setCurrentTab: (tab: 'home' | 'product-detail' | 'checkout' | 'admin' | 'profile') => void;
   cart: CartItem[];
   setIsCartOpen: (open: boolean) => void;
   isAdminUnlocked?: boolean;
@@ -14,7 +14,7 @@ export default function Header({ currentTab, setCurrentTab, cart, setIsCartOpen,
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 
-  const navItems: { label: string; id: string; tab: 'home' | 'product-detail' | 'checkout' | 'admin' }[] = [
+  const navItems: { label: string; id: string; tab: 'home' | 'product-detail' | 'checkout' | 'admin' | 'profile' }[] = [
     { label: 'Cakes', id: 'cakes', tab: 'home' },
     { label: 'Collections', id: 'collections', tab: 'home' },
     { label: 'Gifting & Boxes', id: 'gifting', tab: 'home' },
@@ -116,9 +116,11 @@ export default function Header({ currentTab, setCurrentTab, cart, setIsCartOpen,
 
           {/* Profile Switch Button */}
           <button 
-            onClick={() => setCurrentTab('admin')}
-            className="p-2 rounded-full hover:bg-brand-primary-fixed/20 text-brand-primary transition-all active:scale-95"
-            aria-label="Admin Profile Dashboard"
+            onClick={() => setCurrentTab('profile')}
+            className={`p-2 rounded-full hover:bg-brand-primary-fixed/15 text-brand-primary transition-all active:scale-95 ${
+              currentTab === 'profile' ? 'bg-brand-primary-fixed/30 ring-1 ring-brand-primary/30' : ''
+            }`}
+            aria-label="Member Profile Dashboard"
           >
             <User className="w-5.5 h-5.5" />
           </button>
@@ -158,16 +160,27 @@ export default function Header({ currentTab, setCurrentTab, cart, setIsCartOpen,
               {currentTab === 'admin' ? 'Switch to Cafe Storefront' : 'Launch Baker Admin Dashboard'}
             </button>
           ) : (
-            <button
-              onClick={() => {
-                setCurrentTab('admin');
-                setIsMobileMenuOpen(false);
-              }}
-              className="flex items-center gap-2 font-sans font-semibold text-brand-on-surface-variant/70 py-2.5 px-3 rounded-lg bg-brand-surface-low hover:bg-brand-primary-fixed/20 transition-all text-left"
-            >
-              <User className="w-4 h-4 text-brand-primary" />
-              Staff Login Portal
-            </button>
+            <div className="flex flex-col gap-2 pt-2 border-t border-brand-outline-variant/10">
+              <button
+                onClick={() => {
+                  setCurrentTab('profile');
+                  setIsMobileMenuOpen(false);
+                }}
+                className="flex items-center gap-2 font-sans font-semibold text-brand-primary py-2.5 px-3 rounded-lg bg-brand-primary-fixed/20 hover:bg-brand-primary-fixed/35 transition-all text-left"
+              >
+                <User className="w-4 h-4" />
+                Customer Member Portal
+              </button>
+              <button
+                onClick={() => {
+                  setCurrentTab('admin');
+                  setIsMobileMenuOpen(false);
+                }}
+                className="flex items-center gap-2 font-sans text-brand-on-surface-variant/70 py-1.5 px-3 hover:text-brand-primary transition-all text-left text-xs"
+              >
+                • Access Staff Admin Portal
+              </button>
+            </div>
           )}
         </div>
       )}

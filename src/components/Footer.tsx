@@ -1,7 +1,7 @@
 import { Instagram, Facebook, Mail, CreditCard, ShieldCheck } from 'lucide-react';
 
 interface FooterProps {
-  setCurrentTab: (tab: 'home' | 'product-detail' | 'checkout' | 'admin') => void;
+  setCurrentTab: (tab: 'home' | 'product-detail' | 'checkout' | 'admin' | 'profile') => void;
 }
 
 export default function Footer({ setCurrentTab }: FooterProps) {

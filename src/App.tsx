@@ -7,12 +7,38 @@ import CheckoutScreen from './components/CheckoutScreen';
 import AdminDashboard from './components/AdminDashboard';
 import CartDrawer from './components/CartDrawer';
 import AdminPasscodeModal from './components/AdminPasscodeModal';
-import { CartItem, Order, ScheduleItem, CakeProduct } from './types';
+import UserProfileScreen from './components/UserProfileScreen';
+import { CartItem, Order, ScheduleItem, CakeProduct, Customer } from './types';
 import { INITIAL_ORDERS, INITIAL_SCHEDULE, PRODUCTS } from './data';
 
 export default function App() {
-  const [currentTab, setCurrentTab] = useState<'home' | 'product-detail' | 'checkout' | 'admin'>('home');
+  const [currentTab, setCurrentTab] = useState<'home' | 'product-detail' | 'checkout' | 'admin' | 'profile'>('home');
   const [selectedCakeId, setSelectedCakeId] = useState<string>('midnight-chocolate-truffle');
+
+  // Customer Account Session active memory hook
+  const [currentUser, setCurrentUser] = useState<Customer | null>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('boutique_current_user');
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch (_) {}
+      }
+    }
+    return null;
+  });
+
+  // Synchronize current user state changes locally
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (currentUser) {
+        localStorage.setItem('boutique_current_user', JSON.stringify(currentUser));
+      } else {
+        localStorage.removeItem('boutique_current_user');
+      }
+    }
+  }, [currentUser]);
+
   
   // Shopping Cart & Drawer States
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -54,7 +80,7 @@ export default function App() {
   const [isPasscodeModalOpen, setIsPasscodeModalOpen] = useState<boolean>(false);
 
   // Wrapper: intercepts requests targeting Admin Terminal
-  const handleSetCurrentTab = (tab: 'home' | 'product-detail' | 'checkout' | 'admin') => {
+  const handleSetCurrentTab = (tab: 'home' | 'product-detail' | 'checkout' | 'admin' | 'profile') => {
     if (tab === 'admin') {
       if (isAdminUnlocked) {
         setCurrentTab('admin');
@@ -152,6 +178,7 @@ export default function App() {
             cart={cart} 
             onPlaceOrder={handlePlaceOrder} 
             onBackToStore={() => handleSetCurrentTab('home')} 
+            currentUser={currentUser}
           />
         )}
 
@@ -168,6 +195,16 @@ export default function App() {
               localStorage.removeItem('isStaffUnlocked');
               setCurrentTab('home');
             }}
+          />
+        )}
+
+        {currentTab === 'profile' && (
+          <UserProfileScreen
+            orders={orders}
+            onBackToStore={() => handleSetCurrentTab('home')}
+            onSetTab={handleSetCurrentTab}
+            currentUser={currentUser}
+            onSetCurrentUser={setCurrentUser}
           />
         )}
       </main>

@@ -13,14 +13,24 @@ interface UserProfileScreenProps {
   onSetTab: (tab: 'home' | 'product-detail' | 'checkout' | 'admin' | 'profile') => void;
   currentUser: Customer | null;
   onSetCurrentUser: (user: Customer | null) => void;
+  resetToken?: string | null;
 }
 
-export default function UserProfileScreen({ 
-  orders, 
-  onBackToStore, 
-  onSetTab, 
-  currentUser, 
-  onSetCurrentUser 
+function orderStatusColor(s: string): string {
+  const map: Record<string, string> = {
+    PENDING: '#d97706', CONFIRMED: '#2563eb', BAKING: '#7c3aed', READY: '#0d9488',
+    'OUT FOR DELIVERY': '#ea580c', DELIVERED: '#16a34a', CANCELLED: '#6b7280',
+  };
+  return map[s] ?? '#888';
+}
+
+export default function UserProfileScreen({
+  orders,
+  onBackToStore,
+  onSetTab,
+  currentUser,
+  onSetCurrentUser,
+  resetToken = null
 }: UserProfileScreenProps) {
   // Navigation inside profile screen
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
@@ -47,156 +57,147 @@ export default function UserProfileScreen({
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Load existing accounts or initialize with the user's sandboxed email account for rapid verification
+  const [authLoading, setAuthLoading] = useState(false);
+
+  // Forgot / reset password flow
+  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotSent, setForgotSent] = useState(false);
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [resetMode] = useState(!!resetToken);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+
+  const handleForgotSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotLoading(true);
+    await fetch('/api/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ email: forgotEmail }),
+    }).catch(() => {});
+    setForgotLoading(false);
+    setForgotSent(true);
+  };
+
+  const handleResetSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+    if (newPassword.length < 6) { setErrorMsg('Password must be at least 6 characters.'); return; }
+    if (newPassword !== confirmPassword) { setErrorMsg('Passwords do not match.'); return; }
+    setResetLoading(true);
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ token: resetToken, newPassword }),
+      });
+      const data = await res.json() as { email?: string; user?: Customer; error?: string };
+      if (!res.ok || !data.email) {
+        setErrorMsg(data.error || 'Reset link has expired or is invalid.');
+        setResetLoading(false);
+        return;
+      }
+      if (data.user) onSetCurrentUser(data.user);
+      setSuccessMsg('Password updated! You are now logged in.');
+    } catch {
+      setErrorMsg('Something went wrong. Please try again.');
+    }
+    setResetLoading(false);
+  };
+
+  // Keep getRegisteredUsers for legacy localStorage fallback (existing users)
   const getRegisteredUsers = (): Customer[] => {
     if (typeof window !== 'undefined') {
       const users = localStorage.getItem('boutique_customers');
-      if (users) {
-        try {
-          return JSON.parse(users);
-        } catch (_) {}
-      }
-      // Seed initial customer account for demonstration
-      const initialUsers: Customer[] = [
-        {
-          id: 'cust-1',
-          name: 'Mark Sirilankan',
-          email: 'mark@sirilankan.com',
-          phone: '+94 77 722 5335',
-          address: 'No. 188, Nawala Road',
-          city: 'Nawala',
-          postalCode: '10120',
-          password: 'SecretPastries2026',
-          createdAt: new Date().toISOString()
-        }
-      ];
-      localStorage.setItem('boutique_customers', JSON.stringify(initialUsers));
-      return initialUsers;
+      if (users) { try { return JSON.parse(users); } catch (_) {} }
     }
     return [];
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMsg('');
-    setSuccessMsg('');
-
-    if (!email || !password) {
-      setErrorMsg('Please supply all credentials.');
-      return;
+    setErrorMsg(''); setSuccessMsg('');
+    if (!email || !password) { setErrorMsg('Please supply all credentials.'); return; }
+    setAuthLoading(true);
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json() as { user?: Customer; error?: string };
+      if (!res.ok || !data.user) {
+        // Fallback: try legacy localStorage accounts
+        const users = getRegisteredUsers();
+        const match = users.find(u => u.email.trim().toLowerCase() === email.trim().toLowerCase());
+        if (match && match.password === password) {
+          onSetCurrentUser(match);
+          setSuccessMsg(`Welcome back, ${match.name}!`);
+          setPassword('');
+        } else {
+          setErrorMsg(data.error || 'Invalid email or password.');
+        }
+      } else {
+        onSetCurrentUser(data.user);
+        setSuccessMsg(`Welcome back, ${data.user.name}! Session established.`);
+        setPassword('');
+      }
+    } catch {
+      setErrorMsg('Could not connect. Please try again.');
     }
-
-    const users = getRegisteredUsers();
-    const match = users.find(u => u.email.trim().toLowerCase() === email.trim().toLowerCase());
-
-    if (!match) {
-      setErrorMsg('No customer account found with that email. Please Sign Up to register!');
-      return;
-    }
-
-    if (match.password !== password) {
-      setErrorMsg('Invalid password. Try another password or use the demo credentials.');
-      return;
-    }
-
-    // Success login
-    onSetCurrentUser(match);
-    setSuccessMsg(`Welcome back, ${match.name}! Session established.`);
-    
-    // Sync editing state
-    setEditName(match.name);
-    setEditPhone(match.phone || '');
-    setEditAddress(match.address || '');
-    setEditCity(match.city || '');
-    setEditPostalCode(match.postalCode || '');
-
-    // Reset password field
-    setPassword('');
+    setAuthLoading(false);
   };
 
-  const handleSignUp = (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMsg('');
-    setSuccessMsg('');
-
-    if (!name || !email || !password) {
-      setErrorMsg('Full Name, Email and Password are required fields.');
-      return;
+    setErrorMsg(''); setSuccessMsg('');
+    if (!name || !email || !password) { setErrorMsg('Full Name, Email and Password are required.'); return; }
+    setAuthLoading(true);
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ name, email, password, phone, address, city, postalCode }),
+      });
+      const data = await res.json() as { user?: Customer; error?: string };
+      if (!res.ok || !data.user) {
+        setErrorMsg(data.error || 'Registration failed. Please try again.');
+      } else {
+        onSetCurrentUser(data.user);
+        setSuccessMsg(`Account created! Welcome, ${data.user.name}.`);
+        setName(''); setEmail(''); setPassword(''); setPhone(''); setAddress(''); setCity(''); setPostalCode('');
+      }
+    } catch {
+      setErrorMsg('Could not connect. Please try again.');
     }
-
-    const users = getRegisteredUsers();
-    const exists = users.some(u => u.email.trim().toLowerCase() === email.trim().toLowerCase());
-
-    if (exists) {
-      setErrorMsg('An account under this email is already registered. Please Login instead.');
-      return;
-    }
-
-    const newUser: Customer = {
-      id: `cust-${Date.now()}`,
-      name: name.trim(),
-      email: email.trim().toLowerCase(),
-      phone: phone.trim(),
-      address: address.trim(),
-      city: city.trim(),
-      postalCode: postalCode.trim(),
-      password: password,
-      createdAt: new Date().toISOString()
-    };
-
-    const updatedUsers = [...users, newUser];
-    localStorage.setItem('boutique_customers', JSON.stringify(updatedUsers));
-
-    // Log the user in immediately
-    onSetCurrentUser(newUser);
-    setSuccessMsg(`Account created successfully! Welcome, ${newUser.name}.`);
-
-    // Sync editing state
-    setEditName(newUser.name);
-    setEditPhone(newUser.phone || '');
-    setEditAddress(newUser.address || '');
-    setEditCity(newUser.city || '');
-    setEditPostalCode(newUser.postalCode || '');
-
-    // Clear sign up form
-    setName('');
-    setEmail('');
-    setPassword('');
-    setPhone('');
-    setAddress('');
-    setCity('');
-    setPostalCode('');
+    setAuthLoading(false);
   };
 
-  const handleUpdateProfile = (e: React.FormEvent) => {
+  const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) return;
-
-    setErrorMsg('');
-    setSuccessMsg('');
-
-    if (!editName.trim()) {
-      setErrorMsg('Full Name is required.');
-      return;
+    setErrorMsg(''); setSuccessMsg('');
+    if (!editName.trim()) { setErrorMsg('Full Name is required.'); return; }
+    try {
+      const res = await fetch('/api/auth/profile', {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ id: currentUser.id, name: editName, phone: editPhone, address: editAddress, city: editCity, postalCode: editPostalCode }),
+      });
+      const data = await res.json() as { user?: Customer; error?: string };
+      if (data.user) {
+        onSetCurrentUser(data.user);
+        setIsEditingProfile(false);
+        setSuccessMsg('Profile updated successfully!');
+      } else {
+        setErrorMsg(data.error || 'Update failed.');
+      }
+    } catch {
+      setErrorMsg('Could not connect. Please try again.');
     }
-
-    const updatedUser: Customer = {
-      ...currentUser,
-      name: editName.trim(),
-      phone: editPhone.trim(),
-      address: editAddress.trim(),
-      city: editCity.trim(),
-      postalCode: editPostalCode.trim()
-    };
-
-    // Update inside stored users
-    const users = getRegisteredUsers();
-    const updatedUsers = users.map(u => u.id === currentUser.id ? updatedUser : u);
-    localStorage.setItem('boutique_customers', JSON.stringify(updatedUsers));
-
-    onSetCurrentUser(updatedUser);
-    setIsEditingProfile(false);
-    setSuccessMsg('Profile updated successfully!');
   };
 
   const handleLogout = () => {
@@ -205,9 +206,30 @@ export default function UserProfileScreen({
     setIsEditingProfile(false);
   };
 
-  // Get active and historic orders associated with this account
-  const customerOrders = currentUser 
-    ? orders.filter(o => o.customerEmail.toLowerCase().trim() === currentUser.email.toLowerCase().trim())
+  // Live orders from D1 — fetched on login and polled every 20s for status updates
+  const [liveOrders, setLiveOrders] = useState<Order[]>([]);
+  useEffect(() => {
+    if (!currentUser?.email) return;
+    const fetchOrders = () => {
+      fetch(`/api/orders/customer?email=${encodeURIComponent(currentUser.email)}`)
+        .then(r => r.json())
+        .then((d: Order[]) => setLiveOrders(d))
+        .catch(() => {});
+    };
+    fetchOrders();
+    const interval = setInterval(fetchOrders, 20000);
+    return () => clearInterval(interval);
+  }, [currentUser]);
+
+  // Merge live D1 orders with in-session orders (avoid duplicates)
+  const customerOrders = currentUser
+    ? [
+        ...liveOrders,
+        ...orders.filter(
+          o => o.customerEmail.toLowerCase().trim() === currentUser.email.toLowerCase().trim() &&
+               !liveOrders.some(lo => lo.id === o.id)
+        ),
+      ]
     : [];
 
   // Seed default editing data if user state loads mid-render
@@ -254,7 +276,60 @@ export default function UserProfileScreen({
         </div>
       )}
 
-      {!currentUser ? (
+      {/* ================= RESET PASSWORD VIEW ================= */}
+      {resetMode && !currentUser && (
+        <div className="max-w-md mx-auto bg-white p-8 rounded-3xl border border-brand-outline-variant/15 shadow-sm space-y-6">
+          <div className="text-center space-y-2">
+            <div className="w-14 h-14 bg-brand-primary/10 rounded-full flex items-center justify-center mx-auto text-brand-primary">
+              <KeyRound className="w-7 h-7" />
+            </div>
+            <h2 className="font-serif text-2xl font-semibold text-brand-on-surface">Set New Password</h2>
+            <p className="text-xs text-brand-on-surface-variant">Enter and confirm your new password below.</p>
+          </div>
+          <form onSubmit={handleResetSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-brand-on-surface/85 uppercase tracking-wider mb-1.5">New Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-brand-on-surface-variant/50" />
+                <input
+                  type={showNewPassword ? 'text' : 'password'}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Min. 6 characters"
+                  className="w-full pl-10 pr-12 py-3 bg-brand-surface rounded-xl border border-brand-outline-variant/20 focus:border-brand-primary focus:outline-none text-sm transition-all"
+                  required
+                />
+                <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-3.5 top-3.5 text-brand-on-surface-variant/60 hover:text-brand-primary transition-all">
+                  {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-brand-on-surface/85 uppercase tracking-wider mb-1.5">Confirm Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-brand-on-surface-variant/50" />
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Repeat new password"
+                  className="w-full pl-10 pr-4 py-3 bg-brand-surface rounded-xl border border-brand-outline-variant/20 focus:border-brand-primary focus:outline-none text-sm transition-all"
+                  required
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              disabled={resetLoading}
+              className="w-full py-3.5 bg-brand-primary text-white rounded-xl text-xs font-bold uppercase tracking-widest shadow-sm hover:brightness-105 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-60"
+            >
+              {resetLoading ? 'Updating…' : 'Set New Password'}
+            </button>
+          </form>
+        </div>
+      )}
+
+      {!resetMode && !currentUser ? (
         /* ================= AUTHENTICATION SPLIT SCREEN ================= */
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
@@ -338,7 +413,46 @@ export default function UserProfileScreen({
               </button>
             </div>
 
-            {authMode === 'login' ? (
+            {authMode === 'login' && forgotMode ? (
+              /* FORGOT PASSWORD FORM */
+              <div className="space-y-5">
+                {forgotSent ? (
+                  <div className="text-center space-y-4 py-4">
+                    <div className="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center mx-auto text-emerald-600">
+                      <CheckCircle className="w-7 h-7" />
+                    </div>
+                    <p className="text-sm font-semibold text-brand-on-surface">Check your inbox</p>
+                    <p className="text-xs text-brand-on-surface-variant leading-relaxed">If an account exists for <strong>{forgotEmail}</strong>, a reset link has been sent. Check your spam folder too.</p>
+                    <button type="button" onClick={() => setForgotMode(false)} className="text-brand-primary text-xs font-bold hover:underline">
+                      &larr; Back to Sign In
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleForgotSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-brand-on-surface/85 uppercase tracking-wider mb-1.5">Your Email Address</label>
+                      <div className="relative">
+                        <Mail className="absolute left-3.5 top-3.5 w-4 h-4 text-brand-on-surface-variant/50" />
+                        <input
+                          type="email"
+                          value={forgotEmail}
+                          onChange={(e) => setForgotEmail(e.target.value)}
+                          placeholder="your@email.com"
+                          className="w-full pl-10 pr-4 py-3 bg-brand-surface rounded-xl border border-brand-outline-variant/20 focus:border-brand-primary focus:outline-none text-sm transition-all"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <button type="submit" disabled={forgotLoading} className="w-full py-3.5 bg-brand-primary text-white rounded-xl text-xs font-bold uppercase tracking-widest shadow-sm hover:brightness-105 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-60">
+                      {forgotLoading ? 'Sending…' : 'Send Reset Link'}
+                    </button>
+                    <button type="button" onClick={() => setForgotMode(false)} className="w-full text-center text-xs text-brand-on-surface-variant hover:text-brand-primary font-semibold">
+                      &larr; Back to Sign In
+                    </button>
+                  </form>
+                )}
+              </div>
+            ) : authMode === 'login' ? (
               /* LOGIN FORM */
               <form onSubmit={handleLogin} className="space-y-4">
                 <div>
@@ -379,19 +493,22 @@ export default function UserProfileScreen({
                 </div>
 
                 <div className="pt-2 flex justify-between items-center text-xs text-brand-on-surface-variant">
-                  <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Local Sandbox Authorization Enabled
-                  </span>
-                  <button 
+                  <button
+                    type="button"
+                    onClick={() => { setForgotMode(true); setForgotSent(false); setForgotEmail(email); setErrorMsg(''); setSuccessMsg(''); }}
+                    className="text-brand-primary font-bold hover:underline"
+                  >
+                    Forgot password?
+                  </button>
+                  <button
                     type="button"
                     onClick={() => {
                       setEmail('mark@sirilankan.com');
                       setPassword('SecretPastries2026');
                     }}
-                    className="text-brand-primary font-bold hover:underline"
+                    className="text-brand-on-surface-variant hover:text-brand-primary hover:underline"
                   >
-                    Load Demo Email & Password
+                    Load Demo
                   </button>
                 </div>
 
@@ -399,7 +516,7 @@ export default function UserProfileScreen({
                   type="submit"
                   className="w-full py-3.5 bg-brand-primary text-white rounded-xl text-xs font-bold uppercase tracking-widest shadow-sm hover:brightness-105 active:scale-[0.99] transition-all cursor-pointer mt-4"
                 >
-                  Verify and Sign In
+                  {authLoading ? 'Signing In…' : 'Verify and Sign In'}
                 </button>
               </form>
             ) : (
@@ -520,7 +637,7 @@ export default function UserProfileScreen({
                   type="submit"
                   className="w-full py-3.5 bg-brand-primary text-white rounded-xl text-xs font-bold uppercase tracking-widest shadow-sm hover:brightness-105 active:scale-[0.99] transition-all cursor-pointer mt-6"
                 >
-                  Create Secure Member Profile
+                  {authLoading ? 'Creating Account…' : 'Create Secure Member Profile'}
                 </button>
               </form>
             )}
@@ -528,7 +645,7 @@ export default function UserProfileScreen({
           </div>
 
         </div>
-      ) : (
+      ) : (!resetMode && currentUser) ? (
         /* ================= MEMBER ACTIVE STATE PROFILE LOG ================= */
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
@@ -667,16 +784,6 @@ export default function UserProfileScreen({
             </div>
 
             {/* Subtle gateway credentials note or switch back office */}
-            <div className="p-4 bg-brand-surface-low rounded-2xl border border-brand-outline-variant/10 text-center text-[11px] space-y-1 leading-relaxed text-brand-on-surface-variant">
-              <p className="font-semibold text-brand-primary">Need Baker / Cook Level Views?</p>
-              <p>Staff members can unlock the kitchen terminal schedule directly.</p>
-              <button 
-                onClick={() => onSetTab('admin')}
-                className="text-brand-primary font-bold hover:underline underline-offset-2 uppercase tracking-wider text-[10px] block mx-auto pt-1"
-              >
-                Access Baker Backoffice &rarr;
-              </button>
-            </div>
           </div>
 
           {/* Core Member Order Logging & Carriage History tracker panel */}
@@ -712,11 +819,7 @@ export default function UserProfileScreen({
                     
                     {/* Visual Status Indicator Belt */}
                     <div className="absolute left-0 top-0 bottom-0 w-1 flex flex-col">
-                      <span className={`h-full w-full ${
-                        order.status === 'DELIVERED' ? 'bg-emerald-500' :
-                        order.status === 'BAKING' ? 'bg-brand-primary' :
-                        'bg-amber-500'
-                      }`} />
+                      <span className="h-full w-full" style={{ backgroundColor: orderStatusColor(order.status) }} />
                     </div>
 
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
@@ -728,16 +831,11 @@ export default function UserProfileScreen({
                       {/* Status Pills */}
                       <div className="flex gap-2 items-center">
                         <span className="text-[10px] font-mono text-brand-on-surface-variant">{order.date}</span>
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ring-1 ${
-                          order.status === 'DELIVERED' ? 'bg-emerald-50 text-emerald-700 ring-emerald-300' :
-                          order.status === 'BAKING' ? 'bg-brand-primary-container text-white ring-brand-primary' :
-                          'bg-amber-50 text-amber-700 ring-amber-300'
-                        }`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${
-                            order.status === 'DELIVERED' ? 'bg-emerald-500 animate-pulse' :
-                            order.status === 'BAKING' ? 'bg-white animate-pulse' :
-                            'bg-amber-500 animate-pulse'
-                          }`} />
+                        <span
+                          className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ring-1"
+                          style={{ color: orderStatusColor(order.status), borderColor: orderStatusColor(order.status) + '55', backgroundColor: orderStatusColor(order.status) + '11' }}
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: orderStatusColor(order.status) }} />
                           {order.status}
                         </span>
                       </div>
@@ -755,6 +853,39 @@ export default function UserProfileScreen({
                         </div>
                       ))}
                     </div>
+
+                    {/* Status Timeline */}
+                    {order.status !== 'CANCELLED' ? (() => {
+                      const STEPS = ['PENDING','CONFIRMED','BAKING','READY','OUT FOR DELIVERY','DELIVERED'] as const;
+                      const stepIdx = STEPS.indexOf(order.status as typeof STEPS[number]);
+                      return (
+                        <div className="flex items-start gap-0.5 mt-1 overflow-x-auto pb-1">
+                          {STEPS.map((step, i) => {
+                            const done = stepIdx >= i;
+                            const active = stepIdx === i;
+                            return (
+                              <React.Fragment key={step}>
+                                <div className="flex flex-col items-center flex-shrink-0">
+                                  <div className={`w-2.5 h-2.5 rounded-full border-2 transition-all ${
+                                    done ? 'bg-brand-primary border-brand-primary' : 'bg-white border-brand-outline-variant/40'
+                                  } ${active ? 'ring-2 ring-brand-primary/30 scale-125' : ''}`} />
+                                  <span className={`text-[8px] mt-0.5 font-semibold text-center leading-tight w-[44px] ${
+                                    done ? 'text-brand-primary' : 'text-brand-on-surface-variant/40'
+                                  }`}>{step}</span>
+                                </div>
+                                {i < STEPS.length - 1 && (
+                                  <div className={`h-px flex-1 min-w-[6px] mt-[5px] mx-0.5 ${i < stepIdx ? 'bg-brand-primary' : 'bg-brand-outline-variant/20'}`} />
+                                )}
+                              </React.Fragment>
+                            );
+                          })}
+                        </div>
+                      );
+                    })() : (
+                      <div className="mt-1">
+                        <span className="px-2.5 py-1 bg-red-50 text-red-600 text-[9px] font-bold rounded-full border border-red-200 uppercase tracking-wider">Order Cancelled</span>
+                      </div>
+                    )}
 
                     {/* Carriage Summary footer inside row */}
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs pt-1">
@@ -783,7 +914,7 @@ export default function UserProfileScreen({
           </div>
 
         </div>
-      )}
+      ) : null}
 
     </div>
   );

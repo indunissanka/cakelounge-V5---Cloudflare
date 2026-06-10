@@ -1,0 +1,18 @@
+name = "cakelounge-v5"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+main = "worker/index.ts"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "cakelounge-orders"
+database_id = "695dc1cf-7fc8-4682-acbd-2fc6e4c17218"
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+
+[[rules]]
+type = "ESModule"
+globs = ["**/*.ts"]

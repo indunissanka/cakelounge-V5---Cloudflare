@@ -44,8 +44,8 @@ export default function PayPalPayment({
   const [simulatorStep, setSimulatorStep] = useState<'login' | 'select_funding' | 'processing' | 'success'>('login');
   
   // Simulated form credentials
-  const [paypalEmail, setPaypalEmail] = useState('mark@sirilankan.com');
-  const [paypalPassword, setPaypalPassword] = useState('SecretPastries2026');
+  const [paypalEmail, setPaypalEmail] = useState('');
+  const [paypalPassword, setPaypalPassword] = useState('');
   const [selectedFunding, setSelectedFunding] = useState<'balance' | 'linked_card'>('balance');
   const [fundingError, setFundingError] = useState<string | null>(null);
   const [simulatedTxId, setSimulatedTxId] = useState('');

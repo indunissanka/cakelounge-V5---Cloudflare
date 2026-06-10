@@ -15,6 +15,29 @@ export default function App() {
   const [currentTab, setCurrentTab] = useState<'home' | 'product-detail' | 'checkout' | 'admin' | 'profile'>('home');
   const [selectedCakeId, setSelectedCakeId] = useState<string>('midnight-chocolate-truffle');
 
+  // Detect ?reset= token in URL for password reset flow
+  const [resetToken] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      return new URLSearchParams(window.location.search).get('reset');
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (resetToken) {
+      setCurrentTab('profile');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [resetToken]);
+
+  // Detect ?admin in URL to open admin login directly
+  const [openAdminModal, setOpenAdminModal] = useState(() =>
+    typeof window !== 'undefined' && window.location.search.includes('admin')
+  );
+  useEffect(() => {
+    if (openAdminModal) window.history.replaceState({}, '', window.location.pathname);
+  }, []);
+
   // Customer Account Session active memory hook
   const [currentUser, setCurrentUser] = useState<Customer | null>(() => {
     if (typeof window !== 'undefined') {
@@ -73,7 +96,7 @@ export default function App() {
   // Staff Authorization Gating States
   const [isAdminUnlocked, setIsAdminUnlocked] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('isStaffUnlocked') === 'true';
+      return sessionStorage.getItem('isStaffUnlocked') === 'true';
     }
     return false;
   });
@@ -192,7 +215,7 @@ export default function App() {
             setProducts={setProducts}
             onLogout={() => {
               setIsAdminUnlocked(false);
-              localStorage.removeItem('isStaffUnlocked');
+              sessionStorage.removeItem('isStaffUnlocked');
               setCurrentTab('home');
             }}
           />
@@ -205,6 +228,7 @@ export default function App() {
             onSetTab={handleSetCurrentTab}
             currentUser={currentUser}
             onSetCurrentUser={setCurrentUser}
+            resetToken={resetToken}
           />
         )}
       </main>
@@ -228,17 +252,17 @@ export default function App() {
       <Footer setCurrentTab={handleSetCurrentTab} />
 
       {/* Admin Passcode Gate overlay */}
-      <AdminPasscodeModal 
-        isOpen={isPasscodeModalOpen}
+      <AdminPasscodeModal
+        isOpen={isPasscodeModalOpen || openAdminModal}
         onClose={() => {
           setIsPasscodeModalOpen(false);
-          if (currentTab === 'admin') {
-            setCurrentTab('home');
-          }
+          setOpenAdminModal(false);
+          if (currentTab === 'admin') setCurrentTab('home');
         }}
         onSuccess={() => {
           setIsAdminUnlocked(true);
-          localStorage.setItem('isStaffUnlocked', 'true');
+          setOpenAdminModal(false);
+          sessionStorage.setItem('isStaffUnlocked', 'true');
           setCurrentTab('admin');
         }}
       />

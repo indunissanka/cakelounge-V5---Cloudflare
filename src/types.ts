@@ -1,4 +1,4 @@
-export type OrderStatus = 'PENDING' | 'BAKING' | 'DELIVERED';
+export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'BAKING' | 'READY' | 'OUT FOR DELIVERY' | 'DELIVERED' | 'CANCELLED';
 
 export interface CakeProduct {
   id: string;

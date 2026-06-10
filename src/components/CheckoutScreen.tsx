@@ -63,7 +63,7 @@ export default function CheckoutScreen({ cart, onPlaceOrder, onBackToStore, curr
     const orderId = `CK-${randomSuffix}`;
 
     const newOrder: Order = {
-      id: `${orderId} (${details.transactionId})`,
+      id: orderId,
       customerName: `${firstName} ${lastName}`,
       customerEmail: email || details.email || 'customer@cakelounge.com',
       address: address,
@@ -84,8 +84,15 @@ export default function CheckoutScreen({ cart, onPlaceOrder, onBackToStore, curr
       date: new Date().toISOString().split('T')[0]
     };
 
+    // Persist to D1 and trigger emails via Worker
+    fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(newOrder),
+    }).catch(() => { /* non-blocking — order still confirmed locally */ });
+
     setPlacedOrderRecord(newOrder);
-    onPlaceOrder(newOrder); 
+    onPlaceOrder(newOrder);
   };
 
   // Financial calculations
@@ -211,7 +218,7 @@ export default function CheckoutScreen({ cart, onPlaceOrder, onBackToStore, curr
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
           
           {/* Intake Form (Left - 7 Cols) */}
-          <form onSubmit={(e) => e.preventDefault()} className="lg:col-span-7 space-y-6">
+          <div className="lg:col-span-7 space-y-6">
             
             {/* 1. Recipient Details */}
             <div className="bg-white rounded-2xl border border-brand-outline-variant/15 p-6 space-y-4 shadow-sm text-left">
@@ -319,7 +326,7 @@ export default function CheckoutScreen({ cart, onPlaceOrder, onBackToStore, curr
               </div>
             </div>
 
-            {/* 3. Secure payment details */}
+            {/* 3. Secure payment details — outside the address form so PayPal SDK doesn't block inputs */}
             <div className="bg-white rounded-2xl border border-brand-outline-variant/15 p-6 space-y-5 shadow-sm text-left">
               <h3 className="font-serif text-base font-semibold text-brand-primary flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-brand-primary" />
@@ -358,7 +365,7 @@ export default function CheckoutScreen({ cart, onPlaceOrder, onBackToStore, curr
               </div>
             </div>
 
-          </form>
+          </div>
 
           {/* Checkout Bag Summary (Right - 5 Cols) */}
           <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-24">

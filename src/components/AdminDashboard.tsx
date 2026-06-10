@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { 
-  Landmark, Clock, TrendingUp, Users, Calendar, 
-  Trash2, Plus, CheckCircle, Flame, ShieldAlert, Award, ChevronRight, ShieldCheck
+import React, { useState, useEffect } from 'react';
+import {
+  Landmark, Clock, TrendingUp, Users, Calendar,
+  Trash2, Plus, CheckCircle, Flame, ShieldAlert, Award, ChevronRight, ShieldCheck, KeyRound, Eye, EyeOff
 } from 'lucide-react';
 import { Order, ScheduleItem, OrderStatus, CakeProduct } from '../types';
 
@@ -15,6 +15,14 @@ interface AdminDashboardProps {
   onLogout?: () => void;
 }
 
+function statusColor(s: OrderStatus): string {
+  const map: Record<OrderStatus, string> = {
+    PENDING: '#d97706', CONFIRMED: '#2563eb', BAKING: '#7c3aed', READY: '#0d9488',
+    'OUT FOR DELIVERY': '#ea580c', DELIVERED: '#16a34a', CANCELLED: '#6b7280',
+  };
+  return map[s] ?? '#888';
+}
+
 export default function AdminDashboard({ 
   orders, 
   setOrders, 
@@ -24,7 +32,38 @@ export default function AdminDashboard({
   setProducts,
   onLogout 
 }: AdminDashboardProps) {
-  const [activeMenu, setActiveMenu] = useState<'schedule' | 'orders' | 'products' | 'analytics'>('schedule');
+  const [activeMenu, setActiveMenu] = useState<'schedule' | 'orders' | 'products' | 'analytics' | 'settings'>('schedule');
+
+  // Change password state
+  const [currentPwd, setCurrentPwd] = useState('');
+  const [newPwd, setNewPwd] = useState('');
+  const [confirmPwd, setConfirmPwd] = useState('');
+  const [showPwd, setShowPwd] = useState(false);
+  const [pwdMsg, setPwdMsg] = useState('');
+  const [pwdError, setPwdError] = useState('');
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPwdMsg(''); setPwdError('');
+    if (newPwd.length < 6) { setPwdError('New password must be at least 6 characters.'); return; }
+    if (newPwd !== confirmPwd) { setPwdError('Passwords do not match.'); return; }
+    try {
+      const res = await fetch('/api/admin/change-password', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ username: 'admin@cakelounge.lk', currentPassword: currentPwd, newPassword: newPwd }),
+      });
+      const data = await res.json() as { success?: boolean; error?: string };
+      if (res.ok && data.success) {
+        setPwdMsg('Password updated successfully.');
+        setCurrentPwd(''); setNewPwd(''); setConfirmPwd('');
+      } else {
+        setPwdError(data.error || 'Failed to update password.');
+      }
+    } catch {
+      setPwdError('Could not connect. Please try again.');
+    }
+  };
 
   // New product inputs state list
   const [prodName, setProdName] = useState('');
@@ -46,6 +85,18 @@ export default function AdminDashboard({
       setNotification(null);
     }, 4500);
   };
+
+  // Load orders from D1 on mount — double-fetch handles D1 eventual consistency on refresh
+  useEffect(() => {
+    const loadOrders = () =>
+      fetch(`/api/orders?_=${Date.now()}`)
+        .then(r => r.json())
+        .then((d: Order[]) => setOrders(d))
+        .catch(() => {});
+    loadOrders();
+    const t = setTimeout(loadOrders, 1500);
+    return () => clearTimeout(t);
+  }, []);
 
   // Add Product to State
   const handleCreateProduct = (e: React.FormEvent) => {
@@ -101,14 +152,25 @@ export default function AdminDashboard({
     setOrders(prev => prev.filter(order => order.id !== id));
   };
 
-  // Change Status handle - updates KPIs reactively!
-  const handleUpdateStatus = (id: string, newStatus: OrderStatus) => {
-    setOrders(prev => prev.map(order => {
-      if (order.id === id) {
-        return { ...order, status: newStatus };
+  // Change Status handle - persists to D1 + updates KPIs reactively!
+  const handleUpdateStatus = async (id: string, newStatus: OrderStatus) => {
+    setOrders(prev => prev.map(o => o.id === id ? { ...o, status: newStatus } : o));
+    try {
+      const res = await fetch(`/api/orders/${encodeURIComponent(id)}/status`, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!res.ok) {
+        triggerNotification('Status update failed — please try again.', 'error');
+        fetch(`/api/orders?_=${Date.now()}`)
+          .then(r => r.json())
+          .then((d: Order[]) => setOrders(d))
+          .catch(() => {});
       }
-      return order;
-    }));
+    } catch {
+      triggerNotification('Connection error — status may not have saved.', 'error');
+    }
   };
 
   // Add Custom shift to baking schedule list
@@ -141,8 +203,8 @@ export default function AdminDashboard({
     .filter(o => o.status === 'DELIVERED')
     .reduce((sum, o) => sum + o.total, 0);
 
-  const activeBakingCount = orders.filter(o => o.status === 'BAKING').length;
-  const pendingQueueCount = orders.filter(o => o.status === 'PENDING').length;
+  const activeBakingCount = orders.filter(o => ['BAKING', 'READY', 'OUT FOR DELIVERY'].includes(o.status)).length;
+  const pendingQueueCount = orders.filter(o => ['PENDING', 'CONFIRMED'].includes(o.status)).length;
   
   // Calculate best-selling cake name dynamically from logged orders
   const itemCounts: { [key: string]: number } = {};
@@ -240,6 +302,16 @@ export default function AdminDashboard({
               }`}
             >
               Boutique Performance
+            </button>
+            <button
+              onClick={() => setActiveMenu('settings')}
+              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                activeMenu === 'settings'
+                  ? 'bg-brand-primary text-white shadow-sm'
+                  : 'text-brand-on-surface-variant hover:text-brand-primary'
+              }`}
+            >
+              Settings
             </button>
           </div>
 
@@ -526,41 +598,24 @@ export default function AdminDashboard({
                       Rs. {order.total.toLocaleString()}
                     </td>
 
-                    {/* Status badge */}
+                    {/* Status select */}
                     <td className="py-4 px-4">
-                      <span className={`inline-flex px-2 px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${
-                        order.status === 'DELIVERED' ? 'bg-emerald-100 text-emerald-800' :
-                        order.status === 'BAKING' ? 'bg-purple-100 text-purple-800 animate-pulse' :
-                        'bg-amber-100 text-amber-800'
-                      }`} id={`order-status-badge-${order.id}`}>
-                        {order.status}
-                      </span>
+                      <select
+                        value={order.status}
+                        onChange={e => handleUpdateStatus(order.id, e.target.value as OrderStatus)}
+                        className="text-[10px] rounded-lg px-2 py-1.5 border border-brand-outline-variant/20 bg-brand-surface font-bold uppercase tracking-wider cursor-pointer focus:outline-none focus:border-brand-primary transition-colors"
+                        style={{ color: statusColor(order.status) }}
+                        id={`order-status-badge-${order.id}`}
+                      >
+                        {(['PENDING','CONFIRMED','BAKING','READY','OUT FOR DELIVERY','DELIVERED','CANCELLED'] as OrderStatus[]).map(s => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
                     </td>
 
                     {/* Management controls */}
                     <td className="py-4 px-4 text-right">
                       <div className="flex items-center justify-end gap-1.5 opacity-90 group-hover:opacity-100">
-                        {order.status === 'PENDING' && (
-                          <button
-                            onClick={() => handleUpdateStatus(order.id, 'BAKING')}
-                            className="bg-brand-primary text-white hover:bg-brand-primary-container px-2.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer shadow-sm"
-                            id={`btn-bake-${order.id}`}
-                          >
-                            Furnace Bake
-                          </button>
-                        )}
-
-                        {order.status === 'BAKING' && (
-                          <button
-                            onClick={() => handleUpdateStatus(order.id, 'DELIVERED')}
-                            className="bg-emerald-600 text-white hover:bg-emerald-700 px-2.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer shadow-sm flex items-center gap-1"
-                            id={`btn-deliver-${order.id}`}
-                          >
-                            <CheckCircle className="w-3 h-3" />
-                            Dispatch Trans
-                          </button>
-                        )}
-
                         <button
                           onClick={() => handleDeleteOrder(order.id)}
                           className="p-1.5 text-brand-on-surface-variant hover:text-red-600 hover:bg-red-50 rounded-lg transition-all cursor-pointer"
@@ -880,6 +935,44 @@ export default function AdminDashboard({
               >
                 <Plus className="w-4 h-4" />
                 Inscribe into Storefront
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {activeMenu === 'settings' && (
+        <div className="max-w-md">
+          <div className="bg-white rounded-2xl border border-brand-outline-variant/15 p-6 shadow-sm space-y-5">
+            <div className="flex items-center gap-2 pb-3 border-b border-brand-outline-variant/15">
+              <KeyRound className="w-5 h-5 text-brand-primary" />
+              <h3 className="font-serif text-base font-semibold text-brand-on-surface">Change Admin Password</h3>
+            </div>
+            <form onSubmit={handleChangePassword} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-brand-on-surface/85 uppercase tracking-wider mb-1.5">Current Password</label>
+                <div className="relative">
+                  <input type={showPwd ? 'text' : 'password'} value={currentPwd} onChange={e => setCurrentPwd(e.target.value)}
+                    className="w-full px-4 pr-12 py-3 bg-brand-surface rounded-xl border border-brand-outline-variant/20 focus:border-brand-primary focus:outline-none text-sm" required />
+                  <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3.5 top-3.5 text-brand-on-surface-variant/60 hover:text-brand-primary">
+                    {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-brand-on-surface/85 uppercase tracking-wider mb-1.5">New Password</label>
+                <input type="password" value={newPwd} onChange={e => setNewPwd(e.target.value)}
+                  className="w-full px-4 py-3 bg-brand-surface rounded-xl border border-brand-outline-variant/20 focus:border-brand-primary focus:outline-none text-sm" required />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-brand-on-surface/85 uppercase tracking-wider mb-1.5">Confirm New Password</label>
+                <input type="password" value={confirmPwd} onChange={e => setConfirmPwd(e.target.value)}
+                  className="w-full px-4 py-3 bg-brand-surface rounded-xl border border-brand-outline-variant/20 focus:border-brand-primary focus:outline-none text-sm" required />
+              </div>
+              {pwdError && <p className="text-red-600 text-xs font-semibold">{pwdError}</p>}
+              {pwdMsg && <p className="text-emerald-600 text-xs font-semibold">{pwdMsg}</p>}
+              <button type="submit" className="w-full py-3 bg-brand-primary text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:brightness-105 transition-all">
+                Update Password
               </button>
             </form>
           </div>

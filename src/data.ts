@@ -122,61 +122,68 @@ export const PRODUCTS: CakeProduct[] = [
 
 export const INITIAL_ORDERS: Order[] = [
   {
-    id: 'CK-8902',
+    id: 'CK-9001',
     customerName: 'Suresh Perera',
     customerEmail: 'suresh.perera@gmail.lk',
     address: '45 Nawala Road',
     city: 'Colombo',
     postalCode: '10120',
-    deliveryDate: '2026-06-12',
+    deliveryDate: '2026-06-14',
     items: [
       { productName: 'Double Chocolate Fudge Cake', size: '1.2 kg (8-10 Servings)', quantity: 1, price: 4900.00 }
     ],
-    subtotal: 4900.00,
-    delivery: 450.00,
-    tax: 392.00,
-    total: 5742.00,
-    status: 'DELIVERED',
-    date: '2026-06-08'
+    subtotal: 4900.00, delivery: 450.00, tax: 392.00, total: 5742.00,
+    status: 'PENDING',
+    date: '2026-06-10'
   },
   {
-    id: 'CK-8903',
+    id: 'CK-9002',
+    customerName: 'Kavindra Jayasinghe',
+    customerEmail: 'kavindra.j@slt.lk',
+    address: '22B Duplication Road',
+    city: 'Colombo',
+    postalCode: '00300',
+    deliveryDate: '2026-06-13',
+    items: [
+      { productName: 'Velvet Lavender Dream Cake', size: '1 kg (6-8 Servings)', quantity: 1, price: 4500.00 },
+      { productName: 'Artisan Cupcake Collection', size: 'Box of 6', quantity: 1, price: 1800.00 }
+    ],
+    subtotal: 6300.00, delivery: 450.00, tax: 504.00, total: 7254.00,
+    status: 'CONFIRMED',
+    date: '2026-06-10'
+  },
+  {
+    id: 'CK-9003',
     customerName: 'Julian Casablancas',
     customerEmail: 'julian@thestrokes.com',
     address: '12 Parliament Road',
     city: 'Rajagiriya',
     postalCode: '10100',
-    deliveryDate: '2026-06-11',
+    deliveryDate: '2026-06-12',
     items: [
       { productName: 'Classic Ribbon Cake', size: '1 kg (6-8 Servings)', quantity: 1, price: 3950.00 }
     ],
-    subtotal: 3950.00,
-    delivery: 450.00,
-    tax: 316.00,
-    total: 4716.00,
+    subtotal: 3950.00, delivery: 450.00, tax: 316.00, total: 4716.00,
     status: 'BAKING',
     date: '2026-06-09'
   },
   {
-    id: 'CK-8904',
-    customerName: 'Clara Wickramasinghe',
-    customerEmail: 'clara@cakelounge.lk',
-    address: '88/4 Flower Road',
-    city: 'Colombo',
-    postalCode: '00700',
-    deliveryDate: '2026-06-15',
+    id: 'CK-9004',
+    customerName: 'Nimesha Fernando',
+    customerEmail: 'nimesha.f@hotmail.com',
+    address: '7 Galle Road',
+    city: 'Moratuwa',
+    postalCode: '10400',
+    deliveryDate: '2026-06-11',
     items: [
-      { productName: 'Red Velvet Lounge Gateau', size: '1.2 kg (8-10 Servings)', quantity: 1, price: 5200.00 }
+      { productName: 'Red Velvet Lounge Gateau', size: '1.5 kg (12+ Servings)', quantity: 1, price: 6500.00 }
     ],
-    subtotal: 5200.00,
-    delivery: 450.00,
-    tax: 416.00,
-    total: 6066.00,
-    status: 'PENDING',
-    date: '2026-06-09'
+    subtotal: 6500.00, delivery: 450.00, tax: 520.00, total: 7470.00,
+    status: 'READY',
+    date: '2026-06-08'
   },
   {
-    id: 'CK-8905',
+    id: 'CK-9005',
     customerName: 'Miles Davis',
     customerEmail: 'miles@kindofblue.com',
     address: '10 Havelock Place',
@@ -186,11 +193,38 @@ export const INITIAL_ORDERS: Order[] = [
     items: [
       { productName: 'Belgium Chocolate Cream Gateau', size: '1.2 kg (8-10 Servings)', quantity: 1, price: 4800.00 }
     ],
-    subtotal: 4800.00,
-    delivery: 450.00,
-    tax: 384.00,
-    total: 5634.00,
-    status: 'BAKING',
+    subtotal: 4800.00, delivery: 450.00, tax: 384.00, total: 5634.00,
+    status: 'OUT FOR DELIVERY',
+    date: '2026-06-08'
+  },
+  {
+    id: 'CK-9006',
+    customerName: 'Clara Wickramasinghe',
+    customerEmail: 'clara@cakelounge.lk',
+    address: '88/4 Flower Road',
+    city: 'Colombo',
+    postalCode: '00700',
+    deliveryDate: '2026-06-09',
+    items: [
+      { productName: 'Lemon Elderflower Celebration Cake', size: '1 kg (6-8 Servings)', quantity: 1, price: 4200.00 }
+    ],
+    subtotal: 4200.00, delivery: 450.00, tax: 336.00, total: 4986.00,
+    status: 'DELIVERED',
+    date: '2026-06-07'
+  },
+  {
+    id: 'CK-9007',
+    customerName: 'Roshani Silva',
+    customerEmail: 'roshani.s@gmail.com',
+    address: '3 Temple Lane',
+    city: 'Nugegoda',
+    postalCode: '10250',
+    deliveryDate: '2026-06-13',
+    items: [
+      { productName: 'Double Chocolate Fudge Cake', size: '600g (4-6 Servings)', quantity: 2, price: 2900.00 }
+    ],
+    subtotal: 5800.00, delivery: 450.00, tax: 464.00, total: 6714.00,
+    status: 'CANCELLED',
     date: '2026-06-09'
   }
 ];

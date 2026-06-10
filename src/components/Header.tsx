@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ShoppingBag, User, Menu, X, Landmark } from 'lucide-react';
+import { ShoppingBag, User, Menu, X, Landmark, Lock } from 'lucide-react';
 import { CartItem } from '../types';
 
 interface HeaderProps {
@@ -49,11 +49,21 @@ export default function Header({ currentTab, setCurrentTab, cart, setIsCartOpen,
       <nav className="flex justify-between items-center px-5 md:px-[64px] h-20 w-full max-w-[1280px] mx-auto">
         
         {/* Brand Logo */}
-        <div 
-          onClick={() => setCurrentTab('home')}
-          className="font-serif text-2xl md:text-3xl text-brand-primary tracking-tight cursor-pointer active:scale-95 transition-transform select-none font-semibold hover:opacity-90"
-        >
-          The Cake Lounge
+        <div className="flex flex-col items-start">
+          <div
+            onClick={() => setCurrentTab('home')}
+            className="font-serif text-2xl md:text-3xl text-brand-primary tracking-tight cursor-pointer active:scale-95 transition-transform select-none font-semibold hover:opacity-90"
+          >
+            The Cake Lounge
+          </div>
+          <button
+            onClick={() => setCurrentTab('admin')}
+            className="opacity-0 hover:opacity-40 transition-opacity duration-300 text-brand-on-surface-variant mt-0.5 self-end"
+            aria-label="Admin"
+            tabIndex={-1}
+          >
+            <Lock className="w-2.5 h-2.5" />
+          </button>
         </div>
 
         {/* Desktop Navigation */}

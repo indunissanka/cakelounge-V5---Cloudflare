@@ -562,6 +562,7 @@ export default function AdminDashboard({
                   <th className="py-3 px-4">Client Detail</th>
                   <th className="py-3 px-4">Items Requested & customizations</th>
                   <th className="py-3 px-4">Recalculated Cost</th>
+                  <th className="py-3 px-4">Payment</th>
                   <th className="py-3 px-4">Intake Status</th>
                   <th className="py-3 px-4 text-right">Fulfillment Actions</th>
                 </tr>
@@ -596,6 +597,23 @@ export default function AdminDashboard({
                     {/* Cost */}
                     <td className="py-4 px-4 font-mono font-bold text-brand-primary">
                       Rs. {order.total.toLocaleString()}
+                    </td>
+
+                    {/* Payment */}
+                    <td className="py-4 px-4 text-left">
+                      {order.paymentTransactionId ? (
+                        <div className="space-y-0.5">
+                          <p className="text-[10px] font-mono font-bold text-emerald-700 truncate max-w-[140px]" title={order.paymentTransactionId}>
+                            {order.paymentTransactionId}
+                          </p>
+                          <p className="text-[9px] text-brand-on-surface-variant/70">{order.paymentType}</p>
+                          {order.paymentEmail && (
+                            <p className="text-[9px] text-brand-on-surface-variant/60 truncate max-w-[140px]">{order.paymentEmail}</p>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-[10px] text-brand-on-surface-variant/40 italic">—</span>
+                      )}
                     </td>
 
                     {/* Status select */}

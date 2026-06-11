@@ -127,8 +127,20 @@ export default function PayPalPayment({
               amount: {
                 currency_code: 'USD',
                 value: usdAmount.toFixed(2)
+              },
+              shipping: {
+                name: { full_name: `${billingDetails.firstName} ${billingDetails.lastName}` },
+                address: {
+                  address_line_1: billingDetails.address,
+                  admin_area_2: billingDetails.city,
+                  postal_code: billingDetails.postalCode,
+                  country_code: 'LK'
+                }
               }
-            }]
+            }],
+            application_context: {
+              shipping_preference: 'SET_PROVIDED_ADDRESS'
+            }
           });
         },
         onApprove: async (data: any, actions: any) => {

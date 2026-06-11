@@ -12,6 +12,8 @@ export interface CakeProduct {
   tagType?: 'top-seller' | 'bakers-pick' | 'gluten-free';
   servings?: string;
   weight?: string;
+  markup15kg?: number;
+  markup20kg?: number;
   allergens?: string[];
   longDescription?: string;
   galleryImages?: string[];

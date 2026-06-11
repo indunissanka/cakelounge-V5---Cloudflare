@@ -75,6 +75,8 @@ export default function AdminDashboard({
   const [prodTag, setProdTag] = useState('');
   const [prodServings, setProdServings] = useState('6-8 Servings');
   const [prodWeight, setProdWeight] = useState('');
+  const [prodMarkup15, setProdMarkup15] = useState('1800');
+  const [prodMarkup20, setProdMarkup20] = useState('3600');
   const [prodAllergens, setProdAllergens] = useState<string[]>([]);
 
   // Notification banner state
@@ -119,6 +121,8 @@ export default function AdminDashboard({
       tagType: prodTag === 'Top Seller' ? 'top-seller' : prodTag === "Baker's Pick" ? 'bakers-pick' : prodTag === "Gluten-Free" ? 'gluten-free' : undefined,
       servings: prodServings || undefined,
       weight: prodWeight.trim() || undefined,
+      markup15kg: parseFloat(prodMarkup15) || 1800,
+      markup20kg: parseFloat(prodMarkup20) || 3600,
       allergens: prodAllergens.length > 0 ? prodAllergens : undefined,
       longDescription: prodLongDesc.trim() || undefined,
     };
@@ -132,6 +136,8 @@ export default function AdminDashboard({
     setProdTag('');
     setProdServings('6-8 Servings');
     setProdWeight('');
+    setProdMarkup15('1800');
+    setProdMarkup20('3600');
     setProdAllergens([]);
     
     triggerNotification(`Successfully launched "${newProduct.name}" into your storefront catalog!`, 'success');
@@ -887,7 +893,52 @@ export default function AdminDashboard({
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              {/* Size Composition Tiers */}
+              <div className="space-y-2">
+                <label className="block text-[10px] text-brand-primary font-bold uppercase tracking-wider">Size Composition & Pricing</label>
+                <div className="bg-brand-surface-low/40 border border-brand-outline-variant/20 rounded-xl p-3 space-y-2.5 text-[11px]">
+
+                  {/* Tier 1 — 1.0 kg (base) */}
+                  <div className="flex items-center gap-3">
+                    <span className="w-32 font-bold text-brand-on-surface shrink-0">1.0 kg (6–8 Servings)</span>
+                    <span className="text-brand-on-surface-variant shrink-0">Base Price</span>
+                    <span className="ml-auto font-mono font-bold text-brand-primary">Rs. {(parseFloat(prodPrice) || 0).toLocaleString()}</span>
+                  </div>
+
+                  {/* Tier 2 — 1.5 kg */}
+                  <div className="flex items-center gap-3">
+                    <span className="w-32 font-bold text-brand-on-surface shrink-0">1.5 kg (12–15 Servings)</span>
+                    <span className="text-brand-on-surface-variant shrink-0">+Rs.</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="100"
+                      value={prodMarkup15}
+                      onChange={(e) => setProdMarkup15(e.target.value)}
+                      className="w-24 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono"
+                    />
+                    <span className="ml-auto font-mono font-bold text-brand-primary">= Rs. {((parseFloat(prodPrice) || 0) + (parseFloat(prodMarkup15) || 0)).toLocaleString()}</span>
+                  </div>
+
+                  {/* Tier 3 — 2.0 kg */}
+                  <div className="flex items-center gap-3">
+                    <span className="w-32 font-bold text-brand-on-surface shrink-0">2.0 kg (20–25 Servings)</span>
+                    <span className="text-brand-on-surface-variant shrink-0">+Rs.</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="100"
+                      value={prodMarkup20}
+                      onChange={(e) => setProdMarkup20(e.target.value)}
+                      className="w-24 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono"
+                    />
+                    <span className="ml-auto font-mono font-bold text-brand-primary">= Rs. {((parseFloat(prodPrice) || 0) + (parseFloat(prodMarkup20) || 0)).toLocaleString()}</span>
+                  </div>
+
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <label className="block text-[10px] text-brand-primary font-bold uppercase tracking-wider">Servings Info</label>
                   <input

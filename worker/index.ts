@@ -1,6 +1,8 @@
 export interface Env {
   DB: D1Database;
   RESEND_API_KEY: string;
+  PAYPAL_CLIENT_ID: string;
+  PAYPAL_SECRET: string;
 }
 
 interface OrderItem {
@@ -158,8 +160,9 @@ export default {
       await env.DB.prepare(
         `INSERT OR REPLACE INTO orders
           (id, customer_name, customer_email, address, city, postal_code,
-           delivery_date, items_json, subtotal, delivery, tax, total, status, date)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+           delivery_date, items_json, subtotal, delivery, tax, total, status, date,
+           payment_transaction_id, payment_type, payment_email)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
         .bind(
           order.id,
@@ -175,7 +178,10 @@ export default {
           order.tax,
           order.total,
           order.status ?? 'PENDING',
-          order.date
+          order.date,
+          (order as any).paymentTransactionId ?? null,
+          (order as any).paymentType ?? null,
+          (order as any).paymentEmail ?? null
         )
         .run();
 
@@ -213,6 +219,9 @@ export default {
         total: row.total,
         status: row.status,
         date: row.date,
+        paymentTransactionId: row.payment_transaction_id,
+        paymentType: row.payment_type,
+        paymentEmail: row.payment_email,
       }));
 
       return new Response(JSON.stringify(orders), {
@@ -245,7 +254,47 @@ export default {
           status: 500, headers: { 'content-type': 'application/json', ...corsHeaders },
         });
       }
-      return new Response(JSON.stringify({ success: true, status: body.status }), {
+
+      // If cancelling, attempt PayPal refund if payment exists
+      let refundResult: { refunded: boolean; refundId?: string; error?: string } = { refunded: false };
+      if (body.status === 'CANCELLED') {
+        const orderRow = await env.DB.prepare('SELECT payment_transaction_id FROM orders WHERE id = ?').bind(orderId).first();
+        const captureId = orderRow?.payment_transaction_id as string | null;
+        if (captureId) {
+          try {
+            // Get PayPal access token
+            const tokenRes = await fetch('https://api-m.sandbox.paypal.com/v1/oauth2/token', {
+              method: 'POST',
+              headers: {
+                'Authorization': 'Basic ' + btoa(`${env.PAYPAL_CLIENT_ID}:${env.PAYPAL_SECRET}`),
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              body: 'grant_type=client_credentials',
+            });
+            const tokenData = await tokenRes.json() as { access_token?: string };
+            if (tokenData.access_token) {
+              const refundRes = await fetch(`https://api-m.sandbox.paypal.com/v2/payments/captures/${captureId}/refund`, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${tokenData.access_token}`,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({}),
+              });
+              const refundData = await refundRes.json() as { id?: string; status?: string };
+              if (refundRes.ok && refundData.id) {
+                refundResult = { refunded: true, refundId: refundData.id };
+              } else {
+                refundResult = { refunded: false, error: JSON.stringify(refundData) };
+              }
+            }
+          } catch (e: any) {
+            refundResult = { refunded: false, error: e?.message };
+          }
+        }
+      }
+
+      return new Response(JSON.stringify({ success: true, status: body.status, ...refundResult }), {
         headers: { 'content-type': 'application/json', ...corsHeaders },
       });
     }
@@ -276,6 +325,9 @@ export default {
         total: row.total,
         status: row.status,
         date: row.date,
+        paymentTransactionId: row.payment_transaction_id,
+        paymentType: row.payment_type,
+        paymentEmail: row.payment_email,
       }));
       return new Response(JSON.stringify(orders), {
         headers: { 'content-type': 'application/json', 'Cache-Control': 'no-store', ...corsHeaders },

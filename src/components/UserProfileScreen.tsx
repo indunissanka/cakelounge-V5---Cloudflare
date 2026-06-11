@@ -918,6 +918,12 @@ export default function UserProfileScreen({
                             });
                             if (res.ok) {
                               setLiveOrders(prev => prev.map(o => o.id === order.id ? { ...o, status: 'CANCELLED' } : o));
+                              const data = await res.json() as { refunded?: boolean; refundId?: string };
+                              if (data.refunded) {
+                                alert(`Order cancelled. Your PayPal payment has been refunded (Ref: ${data.refundId}).`);
+                              } else {
+                                alert('Order cancelled. If you paid via PayPal, please contact us for a refund.');
+                              }
                             }
                           }}
                           className="text-[11px] font-semibold text-red-500 hover:text-red-700 border border-red-200 hover:border-red-400 px-3 py-1.5 rounded-lg transition-colors"

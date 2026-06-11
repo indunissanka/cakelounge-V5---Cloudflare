@@ -81,7 +81,10 @@ export default function CheckoutScreen({ cart, onPlaceOrder, onBackToStore, curr
       tax: tax,
       total: total,
       status: 'PENDING',
-      date: new Date().toISOString().split('T')[0]
+      date: new Date().toISOString().split('T')[0],
+      paymentTransactionId: details.transactionId,
+      paymentType: details.paymentType,
+      paymentEmail: details.email || ''
     };
 
     // Persist to D1 and trigger emails via Worker
@@ -177,19 +180,6 @@ export default function CheckoutScreen({ cart, onPlaceOrder, onBackToStore, curr
             Return to Storefront
           </button>
           
-          <button
-            onClick={() => {
-              // Direct switch to administrative portal
-              // The main App layout receives activeTab triggers
-              const devEl = document.getElementById('admin-link-fallback');
-              if (devEl) devEl.click();
-              window.location.reload(); // simple re-init fallback to secure update
-            }}
-            className="px-8 py-3.5 bg-[#f5ece8] hover:bg-brand-primary-fixed/40 text-brand-primary font-bold text-xs tracking-wider uppercase rounded-full cursor-pointer transition-all"
-            id="redirect-to-admin-btn"
-          >
-            Track in Admin Scheduler
-          </button>
         </div>
       </div>
     );

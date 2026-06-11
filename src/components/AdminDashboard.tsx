@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Landmark, Clock, TrendingUp, Users, Calendar,
-  Trash2, Plus, CheckCircle, Flame, ShieldAlert, Award, ChevronRight, ShieldCheck, KeyRound, Eye, EyeOff
+  Trash2, Plus, CheckCircle, Flame, ShieldAlert, Award, ChevronRight, ShieldCheck, KeyRound, Eye, EyeOff, Pencil
 } from 'lucide-react';
 import { Order, ScheduleItem, OrderStatus, CakeProduct } from '../types';
 
@@ -127,7 +127,14 @@ export default function AdminDashboard({
       longDescription: prodLongDesc.trim() || undefined,
     };
 
-    setProducts(prev => [newProduct, ...prev]);
+    if (editingProductId) {
+      setProducts(prev => prev.map(p => p.id === editingProductId ? { ...newProduct, id: editingProductId } : p));
+      setEditingProductId(null);
+      triggerNotification(`"${newProduct.name}" updated successfully.`, 'success');
+    } else {
+      setProducts(prev => [newProduct, ...prev]);
+      triggerNotification(`Successfully launched "${newProduct.name}" into your storefront catalog!`, 'success');
+    }
 
     // Reset inputs
     setProdName('');
@@ -139,8 +146,26 @@ export default function AdminDashboard({
     setProdMarkup15('1800');
     setProdMarkup20('3600');
     setProdAllergens([]);
-    
-    triggerNotification(`Successfully launched "${newProduct.name}" into your storefront catalog!`, 'success');
+  };
+
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+
+  const handleStartEdit = (product: CakeProduct) => {
+    setEditingProductId(product.id);
+    setProdName(product.name);
+    setProdCategory(product.category);
+    setProdPrice(String(product.price));
+    setProdDesc(product.description);
+    setProdLongDesc(product.longDescription || '');
+    setProdImage(product.image);
+    setProdTag(product.tag || '');
+    setProdServings(product.servings || '6-8 Servings');
+    setProdWeight(product.weight || '');
+    setProdMarkup15(String(product.markup15kg ?? 1800));
+    setProdMarkup20(String(product.markup20kg ?? 3600));
+    setProdAllergens(product.allergens || []);
+    // Scroll to form
+    document.getElementById('create-product-btn')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
   // Remove Product action
@@ -777,14 +802,24 @@ export default function AdminDashboard({
                     </p>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteProduct(product.id, product.name)}
-                    className="p-1.5 text-brand-on-surface-variant hover:text-red-600 hover:bg-red-50 rounded-lg transition-all absolute right-2 top-2 opacity-0 group-hover:opacity-100 cursor-pointer"
-                    title="Remove product from catalog"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                  <div className="absolute right-2 top-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                    <button
+                      type="button"
+                      onClick={() => handleStartEdit(product)}
+                      className="p-1.5 text-brand-on-surface-variant hover:text-brand-primary hover:bg-brand-primary/10 rounded-lg transition-all cursor-pointer"
+                      title="Edit product"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteProduct(product.id, product.name)}
+                      className="p-1.5 text-brand-on-surface-variant hover:text-red-600 hover:bg-red-50 rounded-lg transition-all cursor-pointer"
+                      title="Remove product from catalog"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -793,8 +828,8 @@ export default function AdminDashboard({
           {/* Catalog Intake Form (Right - 5 Cols) */}
           <div className="lg:col-span-5 bg-[#fcf9f7] rounded-3xl p-6 border border-brand-outline-variant/15 space-y-4">
             <h3 className="font-serif text-base font-semibold text-brand-primary border-b border-brand-outline-variant/15 pb-2 flex items-center gap-2">
-              <Plus className="w-4 h-4 text-brand-primary" />
-              Add New Gourmet Product
+              {editingProductId ? <Pencil className="w-4 h-4 text-brand-primary" /> : <Plus className="w-4 h-4 text-brand-primary" />}
+              {editingProductId ? 'Edit Product' : 'Add New Gourmet Product'}
             </h3>
 
             <form onSubmit={handleCreateProduct} className="space-y-4 text-xs font-medium text-left">
@@ -1013,14 +1048,30 @@ export default function AdminDashboard({
                 </div>
               </div>
 
-              <button
-                type="submit"
-                className="w-full py-3.5 bg-brand-primary hover:brightness-110 text-white font-bold text-xs tracking-wider uppercase rounded-xl transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5"
-                id="create-product-btn"
-              >
-                <Plus className="w-4 h-4" />
-                Inscribe into Storefront
-              </button>
+              <div className="flex gap-2">
+                {editingProductId && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingProductId(null);
+                      setProdName(''); setProdDesc(''); setProdLongDesc(''); setProdTag('');
+                      setProdServings('6-8 Servings'); setProdWeight('');
+                      setProdMarkup15('1800'); setProdMarkup20('3600'); setProdAllergens([]);
+                      setProdPrice('3900');
+                    }}
+                    className="py-3.5 px-5 border border-brand-outline-variant/30 text-brand-on-surface-variant hover:bg-brand-surface-low font-bold text-xs tracking-wider uppercase rounded-xl transition-all cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  className="flex-1 py-3.5 bg-brand-primary hover:brightness-110 text-white font-bold text-xs tracking-wider uppercase rounded-xl transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5"
+                  id="create-product-btn"
+                >
+                  {editingProductId ? <><Pencil className="w-4 h-4" /> Save Changes</> : <><Plus className="w-4 h-4" /> Inscribe into Storefront</>}
+                </button>
+              </div>
             </form>
           </div>
         </div>

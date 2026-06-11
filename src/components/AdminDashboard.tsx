@@ -74,6 +74,7 @@ export default function AdminDashboard({
   const [prodImage, setProdImage] = useState('https://lh3.googleusercontent.com/aida-public/AB6AXuD9xg23JS1m4efL9471QbGoCMXQ8bREBf4rmiEUsiiZ1DtA43Izo8whF4OBWlboGEe0Aa3nnYVteJ1aCUP2zV93ExluaKODbXHiKA8BhHAmdoUj2vY0_5o0KZ8wbdna2iNNELxvWFBr-TtUjk6Ukonssn9vTtAXuDLIn4nkCgVdSc1eDXVO1DgztvyqYOmBpw3u37mCTHGXsIPPaDEXOedqHrdX9SRPk5gmo21sPXS7YJukfAPHw1Wp_-UpKUB8jY99nr8F4-dV4bU');
   const [prodTag, setProdTag] = useState('');
   const [prodServings, setProdServings] = useState('6-8 Servings');
+  const [prodWeight, setProdWeight] = useState('');
   const [prodAllergens, setProdAllergens] = useState<string[]>([]);
 
   // Notification banner state
@@ -117,6 +118,7 @@ export default function AdminDashboard({
       tag: prodTag || undefined,
       tagType: prodTag === 'Top Seller' ? 'top-seller' : prodTag === "Baker's Pick" ? 'bakers-pick' : prodTag === "Gluten-Free" ? 'gluten-free' : undefined,
       servings: prodServings || undefined,
+      weight: prodWeight.trim() || undefined,
       allergens: prodAllergens.length > 0 ? prodAllergens : undefined,
       longDescription: prodLongDesc.trim() || undefined,
     };
@@ -129,6 +131,7 @@ export default function AdminDashboard({
     setProdLongDesc('');
     setProdTag('');
     setProdServings('6-8 Servings');
+    setProdWeight('');
     setProdAllergens([]);
     
     triggerNotification(`Successfully launched "${newProduct.name}" into your storefront catalog!`, 'success');
@@ -884,7 +887,7 @@ export default function AdminDashboard({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-1.5">
                   <label className="block text-[10px] text-brand-primary font-bold uppercase tracking-wider">Servings Info</label>
                   <input
@@ -892,6 +895,19 @@ export default function AdminDashboard({
                     placeholder="e.g. 6-8 Servings"
                     value={prodServings}
                     onChange={(e) => setProdServings(e.target.value)}
+                    className="w-full p-2.5 bg-white border border-brand-outline-variant/30 rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-[10px] text-brand-primary font-bold uppercase tracking-wider">Weight (kg)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0.1"
+                    placeholder="e.g. 1.5"
+                    value={prodWeight}
+                    onChange={(e) => setProdWeight(e.target.value)}
                     className="w-full p-2.5 bg-white border border-brand-outline-variant/30 rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs"
                   />
                 </div>

@@ -11,6 +11,7 @@ export interface CakeProduct {
   tag?: string;
   tagType?: 'top-seller' | 'bakers-pick' | 'gluten-free';
   servings?: string;
+  weight?: string;
   allergens?: string[];
   longDescription?: string;
   galleryImages?: string[];
@@ -46,6 +47,9 @@ export interface Order {
   total: number;
   status: OrderStatus;
   date: string;
+  paymentTransactionId?: string;
+  paymentType?: string;
+  paymentEmail?: string;
 }
 
 export interface ScheduleItem {

@@ -53,7 +53,7 @@ export default function HomeScreen({ products, onSelectCake, setCurrentTab }: Ho
           <div className="relative z-10 max-w-2xl px-6 md:px-16 space-y-6 text-white py-12">
             <div className="inline-flex items-center gap-2 bg-brand-primary-container/60 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 text-brand-primary-fixed text-xs font-semibold tracking-widest uppercase">
               <Sparkles className="w-3.5 h-3.5 text-pink-300" />
-              Official Nawala, Sri Lanka Boutique
+              Official Nugegoda, Sri Lanka Boutique
             </div>
             
             <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-semibold leading-[1.1] tracking-tight">

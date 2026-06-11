@@ -123,7 +123,7 @@ export default function PayPalPayment({
           const usdAmount = amount * 0.0033;
           return actions.order.create({
             purchase_units: [{
-              description: 'The Cake Lounge Gourmet Patisserie (Nawala)',
+              description: 'The Cake Lounge Gourmet Patisserie (Nugegoda)',
               amount: {
                 currency_code: 'USD',
                 value: usdAmount.toFixed(2)
@@ -415,7 +415,7 @@ export default function PayPalPayment({
 
                 <div className="text-right">
                   <span className="block text-[8px] uppercase tracking-wider text-gray-300">Secure Merchant</span>
-                  <span className="text-xs font-bold tracking-tight text-white leading-none">The Cake Lounge (Nawala)</span>
+                  <span className="text-xs font-bold tracking-tight text-white leading-none">The Cake Lounge (Nugegoda)</span>
                 </div>
               </div>
 

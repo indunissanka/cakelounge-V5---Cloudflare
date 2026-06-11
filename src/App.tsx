@@ -64,7 +64,12 @@ export default function App() {
 
   
   // Shopping Cart & Drawer States
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    try {
+      const stored = localStorage.getItem('boutique_cart');
+      return stored ? JSON.parse(stored) : [];
+    } catch { return []; }
+  });
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Administrative State Matrices (Linked Reactively!)
@@ -86,7 +91,12 @@ export default function App() {
     return PRODUCTS;
   });
 
-  // Synchronize products changes locally 
+  // Persist cart to localStorage
+  useEffect(() => {
+    localStorage.setItem('boutique_cart', JSON.stringify(cart));
+  }, [cart]);
+
+  // Synchronize products changes locally
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('boutique_products', JSON.stringify(products));

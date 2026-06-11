@@ -906,6 +906,27 @@ export default function UserProfileScreen({
                       </div>
                     </div>
 
+                    {(order.status === 'PENDING' || order.status === 'CONFIRMED') && (
+                      <div className="pt-2 border-t border-brand-outline-variant/10 flex justify-end">
+                        <button
+                          onClick={async () => {
+                            if (!confirm('Cancel this order? This cannot be undone.')) return;
+                            const res = await fetch(`/api/orders/${encodeURIComponent(order.id)}/status`, {
+                              method: 'PATCH',
+                              headers: { 'content-type': 'application/json' },
+                              body: JSON.stringify({ status: 'CANCELLED' }),
+                            });
+                            if (res.ok) {
+                              setLiveOrders(prev => prev.map(o => o.id === order.id ? { ...o, status: 'CANCELLED' } : o));
+                            }
+                          }}
+                          className="text-[11px] font-semibold text-red-500 hover:text-red-700 border border-red-200 hover:border-red-400 px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                          Cancel Order
+                        </button>
+                      </div>
+                    )}
+
                   </div>
                 ))}
               </div>

@@ -73,7 +73,9 @@ export default function AdminDashboard({
   const [prodLongDesc, setProdLongDesc] = useState('');
   const [prodImage, setProdImage] = useState('https://lh3.googleusercontent.com/aida-public/AB6AXuD9xg23JS1m4efL9471QbGoCMXQ8bREBf4rmiEUsiiZ1DtA43Izo8whF4OBWlboGEe0Aa3nnYVteJ1aCUP2zV93ExluaKODbXHiKA8BhHAmdoUj2vY0_5o0KZ8wbdna2iNNELxvWFBr-TtUjk6Ukonssn9vTtAXuDLIn4nkCgVdSc1eDXVO1DgztvyqYOmBpw3u37mCTHGXsIPPaDEXOedqHrdX9SRPk5gmo21sPXS7YJukfAPHw1Wp_-UpKUB8jY99nr8F4-dV4bU');
   const [prodTag, setProdTag] = useState('');
-  const [prodServings, setProdServings] = useState('6-8 Servings');
+  const [prodServings1, setProdServings1] = useState('6-8');
+  const [prodServings2, setProdServings2] = useState('12-15');
+  const [prodServings3, setProdServings3] = useState('20-25');
   const [prodWeight, setProdWeight] = useState('');
   const [prodKg1, setProdKg1] = useState('1.0');
   const [prodKg2, setProdKg2] = useState('1.5');
@@ -122,7 +124,9 @@ export default function AdminDashboard({
       category: prodCategory,
       tag: prodTag || undefined,
       tagType: prodTag === 'Top Seller' ? 'top-seller' : prodTag === "Baker's Pick" ? 'bakers-pick' : prodTag === "Gluten-Free" ? 'gluten-free' : undefined,
-      servings: prodServings || undefined,
+      servings: prodServings1 ? `${prodServings1} Servings` : undefined,
+      servings2: prodServings2 ? `${prodServings2} Servings` : undefined,
+      servings3: prodServings3 ? `${prodServings3} Servings` : undefined,
       weight: prodWeight.trim() || undefined,
       kg1: prodKg1 || '1.0',
       kg2: prodKg2 || '1.5',
@@ -147,7 +151,9 @@ export default function AdminDashboard({
     setProdDesc('');
     setProdLongDesc('');
     setProdTag('');
-    setProdServings('6-8 Servings');
+    setProdServings1('6-8');
+    setProdServings2('12-15');
+    setProdServings3('20-25');
     setProdWeight('');
     setProdKg1('1.0');
     setProdKg2('1.5');
@@ -168,7 +174,9 @@ export default function AdminDashboard({
     setProdLongDesc(product.longDescription || '');
     setProdImage(product.image);
     setProdTag(product.tag || '');
-    setProdServings(product.servings || '6-8 Servings');
+    setProdServings1(product.servings?.replace(' Servings','') || '6-8');
+    setProdServings2(product.servings2?.replace(' Servings','') || '12-15');
+    setProdServings3(product.servings3?.replace(' Servings','') || '20-25');
     setProdWeight(product.weight || '');
     setProdKg1(product.kg1 || '1.0');
     setProdKg2(product.kg2 || '1.5');
@@ -930,46 +938,34 @@ export default function AdminDashboard({
                 <label className="block text-[10px] text-brand-primary font-bold uppercase tracking-wider">Size Composition & Pricing</label>
                 <div className="bg-brand-surface-low/40 border border-brand-outline-variant/20 rounded-xl p-3 space-y-2.5 text-[11px]">
 
+                  {/* Header */}
+                  <div className="flex items-center gap-3 text-[9px] uppercase tracking-wider text-brand-on-surface-variant/60 font-bold pb-1 border-b border-brand-outline-variant/15">
+                    <span className="w-14 shrink-0">kg</span>
+                    <span className="w-20 shrink-0">Servings</span>
+                    <span>Price (Rs.)</span>
+                    <span className="ml-auto">Total</span>
+                  </div>
+
                   {/* Tier 1 — base */}
                   <div className="flex items-center gap-3">
-                    <input
-                      type="number" step="0.1" min="0.1"
-                      value={prodKg1}
-                      onChange={(e) => setProdKg1(e.target.value)}
-                      className="w-14 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono"
-                    />
-                    <span className="text-brand-on-surface-variant shrink-0">kg — Rs.</span>
-                    <input
-                      type="number"
-                      min="1"
-                      step="100"
-                      required
-                      placeholder="e.g. 3900"
-                      value={prodPrice}
-                      onChange={(e) => setProdPrice(e.target.value)}
-                      className="w-24 p-1.5 bg-white border border-brand-primary/40 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono"
-                    />
-                    <span className="ml-auto font-mono font-bold text-brand-primary">= Rs. {(parseFloat(prodPrice) || 0).toLocaleString()}</span>
+                    <input type="number" step="0.1" min="0.1" value={prodKg1} onChange={(e) => setProdKg1(e.target.value)}
+                      className="w-14 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono shrink-0" />
+                    <input type="text" placeholder="e.g. 6-8" value={prodServings1} onChange={(e) => setProdServings1(e.target.value)}
+                      className="w-20 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs shrink-0" />
+                    <input type="number" min="1" step="100" required placeholder="3900" value={prodPrice} onChange={(e) => setProdPrice(e.target.value)}
+                      className="w-24 p-1.5 bg-white border border-brand-primary/40 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono" />
+                    <span className="ml-auto font-mono font-bold text-brand-primary shrink-0">Rs. {(parseFloat(prodPrice) || 0).toLocaleString()}</span>
                   </div>
 
                   {/* Tier 2 */}
                   <div className="flex items-center gap-3">
-                    <input
-                      type="number" step="0.1" min="0.1"
-                      value={prodKg2}
-                      onChange={(e) => setProdKg2(e.target.value)}
-                      className="w-14 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono"
-                    />
-                    <span className="text-brand-on-surface-variant shrink-0">kg +Rs.</span>
-                    <input
-                      type="number"
-                      min="0"
-                      step="100"
-                      value={prodMarkup15}
-                      onChange={(e) => setProdMarkup15(e.target.value)}
-                      className="w-24 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono"
-                    />
-                    <span className="ml-auto font-mono font-bold text-brand-primary">= Rs. {((parseFloat(prodPrice) || 0) + (parseFloat(prodMarkup15) || 0)).toLocaleString()}</span>
+                    <input type="number" step="0.1" min="0.1" value={prodKg2} onChange={(e) => setProdKg2(e.target.value)}
+                      className="w-14 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono shrink-0" />
+                    <input type="text" placeholder="e.g. 12-15" value={prodServings2} onChange={(e) => setProdServings2(e.target.value)}
+                      className="w-20 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs shrink-0" />
+                    <input type="number" min="0" step="100" placeholder="+markup" value={prodMarkup15} onChange={(e) => setProdMarkup15(e.target.value)}
+                      className="w-24 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono" />
+                    <span className="ml-auto font-mono font-bold text-brand-primary shrink-0">Rs. {((parseFloat(prodPrice)||0)+(parseFloat(prodMarkup15)||0)).toLocaleString()}</span>
                   </div>
 
                   {/* Tier 3 */}
@@ -995,30 +991,17 @@ export default function AdminDashboard({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="block text-[10px] text-brand-primary font-bold uppercase tracking-wider">Servings Info</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. 6-8 Servings"
-                    value={prodServings}
-                    onChange={(e) => setProdServings(e.target.value)}
-                    className="w-full p-2.5 bg-white border border-brand-outline-variant/30 rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="block text-[10px] text-brand-primary font-bold uppercase tracking-wider">Weight (kg)</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="0.1"
-                    placeholder="e.g. 1.5"
-                    value={prodWeight}
-                    onChange={(e) => setProdWeight(e.target.value)}
-                    className="w-full p-2.5 bg-white border border-brand-outline-variant/30 rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs"
-                  />
-                </div>
+              <div className="space-y-1.5">
+                <label className="block text-[10px] text-brand-primary font-bold uppercase tracking-wider">Weight (kg)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0.1"
+                  placeholder="e.g. 1.5"
+                  value={prodWeight}
+                  onChange={(e) => setProdWeight(e.target.value)}
+                  className="w-full p-2.5 bg-white border border-brand-outline-variant/30 rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs"
+                />
 
                 <div className="space-y-1.5">
                   <label className="block text-[10px] text-brand-primary font-bold uppercase tracking-wider">Aesthetic Badge</label>
@@ -1077,7 +1060,7 @@ export default function AdminDashboard({
                     onClick={() => {
                       setEditingProductId(null);
                       setProdName(''); setProdDesc(''); setProdLongDesc(''); setProdTag('');
-                      setProdServings('6-8 Servings'); setProdWeight('');
+                      setProdServings1('6-8'); setProdServings2('12-15'); setProdServings3('20-25'); setProdWeight('');
                       setProdKg1('1.0'); setProdKg2('1.5'); setProdKg3('2.0');
                       setProdMarkup15('1800'); setProdMarkup20('3600'); setProdAllergens([]);
                       setProdPrice('3900');

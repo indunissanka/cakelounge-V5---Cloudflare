@@ -915,35 +915,35 @@ export default function AdminDashboard({
                 <label className="block text-[10px] text-brand-primary font-bold uppercase tracking-wider">Size Composition & Pricing</label>
                 <div className="bg-brand-surface-low/40 border border-brand-outline-variant/20 rounded-xl p-3 space-y-2 text-[11px]">
                   {/* Header */}
-                  <div className="flex items-center gap-2 text-[9px] uppercase tracking-wider text-brand-on-surface-variant/60 font-bold pb-1 border-b border-brand-outline-variant/15">
-                    <span className="w-14 shrink-0">kg</span>
-                    <span className="w-20 shrink-0">Servings</span>
-                    <span className="flex-1">Price (Rs.)</span>
-                    <span className="w-24 text-right shrink-0">Total</span>
-                    <span className="w-5 shrink-0" />
+                  <div className="grid grid-cols-[56px_80px_1fr_96px_20px] gap-2 text-[9px] uppercase tracking-wider text-brand-on-surface-variant/60 font-bold pb-1 border-b border-brand-outline-variant/15">
+                    <span>kg</span>
+                    <span>Servings</span>
+                    <span>Price (Rs.)</span>
+                    <span className="text-right">Total</span>
+                    <span />
                   </div>
 
                   {sizeTiers.map((tier, i) => (
-                    <div key={i} className="flex items-center gap-2">
+                    <div key={i} className="grid grid-cols-[56px_80px_1fr_96px_20px] gap-2 items-center">
                       <input type="number" step="0.1" min="0.1" value={tier.kg}
                         onChange={e => setSizeTiers(prev => prev.map((t, j) => j === i ? { ...t, kg: e.target.value } : t))}
-                        className="w-14 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono shrink-0" />
+                        className="w-full p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono" />
                       <input type="text" placeholder="e.g. 6-8" value={tier.servings}
                         onChange={e => setSizeTiers(prev => prev.map((t, j) => j === i ? { ...t, servings: e.target.value } : t))}
-                        className="w-20 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs shrink-0" />
+                        className="w-full p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs" />
                       <input type="number" min="0" step="1" required={i === 0} placeholder={i === 0 ? 'Base price' : 'Price'}
                         value={tier.price}
                         onChange={e => setSizeTiers(prev => prev.map((t, j) => j === i ? { ...t, price: e.target.value } : t))}
-                        className={`flex-1 p-1.5 bg-white border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono ${i === 0 ? 'border-brand-primary/40' : 'border-brand-outline-variant/30'}`} />
-                      <span className="w-24 text-right font-mono font-bold text-brand-primary shrink-0 text-[10px]">
+                        className={`w-full p-1.5 bg-white border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono ${i === 0 ? 'border-brand-primary/40' : 'border-brand-outline-variant/30'}`} />
+                      <span className="text-right font-mono font-bold text-brand-primary text-[10px]">
                         Rs. {(parseFloat(tier.price) || 0).toLocaleString()}
                       </span>
                       {i > 0 ? (
                         <button type="button" onClick={() => setSizeTiers(prev => prev.filter((_, j) => j !== i))}
-                          className="w-5 h-5 flex items-center justify-center text-red-400 hover:text-red-600 shrink-0 cursor-pointer">
+                          className="flex items-center justify-center text-red-400 hover:text-red-600 cursor-pointer text-sm leading-none">
                           ×
                         </button>
-                      ) : <span className="w-5 shrink-0" />}
+                      ) : <span />}
                     </div>
                   ))}
 

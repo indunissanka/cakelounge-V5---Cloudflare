@@ -75,6 +75,9 @@ export default function AdminDashboard({
   const [prodTag, setProdTag] = useState('');
   const [prodServings, setProdServings] = useState('6-8 Servings');
   const [prodWeight, setProdWeight] = useState('');
+  const [prodKg1, setProdKg1] = useState('1.0');
+  const [prodKg2, setProdKg2] = useState('1.5');
+  const [prodKg3, setProdKg3] = useState('2.0');
   const [prodMarkup15, setProdMarkup15] = useState('1800');
   const [prodMarkup20, setProdMarkup20] = useState('3600');
   const [prodAllergens, setProdAllergens] = useState<string[]>([]);
@@ -121,6 +124,9 @@ export default function AdminDashboard({
       tagType: prodTag === 'Top Seller' ? 'top-seller' : prodTag === "Baker's Pick" ? 'bakers-pick' : prodTag === "Gluten-Free" ? 'gluten-free' : undefined,
       servings: prodServings || undefined,
       weight: prodWeight.trim() || undefined,
+      kg1: prodKg1 || '1.0',
+      kg2: prodKg2 || '1.5',
+      kg3: prodKg3 || '2.0',
       markup15kg: parseFloat(prodMarkup15) || 1800,
       markup20kg: parseFloat(prodMarkup20) || 3600,
       allergens: prodAllergens.length > 0 ? prodAllergens : undefined,
@@ -143,6 +149,9 @@ export default function AdminDashboard({
     setProdTag('');
     setProdServings('6-8 Servings');
     setProdWeight('');
+    setProdKg1('1.0');
+    setProdKg2('1.5');
+    setProdKg3('2.0');
     setProdMarkup15('1800');
     setProdMarkup20('3600');
     setProdAllergens([]);
@@ -161,6 +170,9 @@ export default function AdminDashboard({
     setProdTag(product.tag || '');
     setProdServings(product.servings || '6-8 Servings');
     setProdWeight(product.weight || '');
+    setProdKg1(product.kg1 || '1.0');
+    setProdKg2(product.kg2 || '1.5');
+    setProdKg3(product.kg3 || '2.0');
     setProdMarkup15(String(product.markup15kg ?? 1800));
     setProdMarkup20(String(product.markup20kg ?? 3600));
     setProdAllergens(product.allergens || []);
@@ -918,10 +930,15 @@ export default function AdminDashboard({
                 <label className="block text-[10px] text-brand-primary font-bold uppercase tracking-wider">Size Composition & Pricing</label>
                 <div className="bg-brand-surface-low/40 border border-brand-outline-variant/20 rounded-xl p-3 space-y-2.5 text-[11px]">
 
-                  {/* Tier 1 — 1.0 kg (base) */}
+                  {/* Tier 1 — base */}
                   <div className="flex items-center gap-3">
-                    <span className="w-32 font-bold text-brand-on-surface shrink-0">1.0 kg (6–8 Servings)</span>
-                    <span className="text-brand-on-surface-variant shrink-0">Rs.</span>
+                    <input
+                      type="number" step="0.1" min="0.1"
+                      value={prodKg1}
+                      onChange={(e) => setProdKg1(e.target.value)}
+                      className="w-14 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono"
+                    />
+                    <span className="text-brand-on-surface-variant shrink-0">kg — Rs.</span>
                     <input
                       type="number"
                       min="1"
@@ -935,10 +952,15 @@ export default function AdminDashboard({
                     <span className="ml-auto font-mono font-bold text-brand-primary">= Rs. {(parseFloat(prodPrice) || 0).toLocaleString()}</span>
                   </div>
 
-                  {/* Tier 2 — 1.5 kg */}
+                  {/* Tier 2 */}
                   <div className="flex items-center gap-3">
-                    <span className="w-32 font-bold text-brand-on-surface shrink-0">1.5 kg (12–15 Servings)</span>
-                    <span className="text-brand-on-surface-variant shrink-0">+Rs.</span>
+                    <input
+                      type="number" step="0.1" min="0.1"
+                      value={prodKg2}
+                      onChange={(e) => setProdKg2(e.target.value)}
+                      className="w-14 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono"
+                    />
+                    <span className="text-brand-on-surface-variant shrink-0">kg +Rs.</span>
                     <input
                       type="number"
                       min="0"
@@ -950,10 +972,15 @@ export default function AdminDashboard({
                     <span className="ml-auto font-mono font-bold text-brand-primary">= Rs. {((parseFloat(prodPrice) || 0) + (parseFloat(prodMarkup15) || 0)).toLocaleString()}</span>
                   </div>
 
-                  {/* Tier 3 — 2.0 kg */}
+                  {/* Tier 3 */}
                   <div className="flex items-center gap-3">
-                    <span className="w-32 font-bold text-brand-on-surface shrink-0">2.0 kg (20–25 Servings)</span>
-                    <span className="text-brand-on-surface-variant shrink-0">+Rs.</span>
+                    <input
+                      type="number" step="0.1" min="0.1"
+                      value={prodKg3}
+                      onChange={(e) => setProdKg3(e.target.value)}
+                      className="w-14 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono"
+                    />
+                    <span className="text-brand-on-surface-variant shrink-0">kg +Rs.</span>
                     <input
                       type="number"
                       min="0"
@@ -1051,6 +1078,7 @@ export default function AdminDashboard({
                       setEditingProductId(null);
                       setProdName(''); setProdDesc(''); setProdLongDesc(''); setProdTag('');
                       setProdServings('6-8 Servings'); setProdWeight('');
+                      setProdKg1('1.0'); setProdKg2('1.5'); setProdKg3('2.0');
                       setProdMarkup15('1800'); setProdMarkup20('3600'); setProdAllergens([]);
                       setProdPrice('3900');
                     }}

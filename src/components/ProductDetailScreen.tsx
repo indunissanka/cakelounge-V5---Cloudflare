@@ -50,9 +50,9 @@ export default function ProductDetailScreen({ products, productId, onBackToStore
     { label: 'Box of 12', markup: 1800.00 },
     { label: 'Box of 24', markup: 3400.00 }
   ] : [
-    { label: '1.0 kg (6-8 Servings)', markup: 0 },
-    { label: '1.5 kg (12-15 Servings)', markup: product.markup15kg ?? 1800.00 },
-    { label: '2.0 kg (20-25 Servings)', markup: product.markup20kg ?? 3600.00 }
+    { label: `${product.kg1 ?? '1.0'} kg`, markup: 0 },
+    { label: `${product.kg2 ?? '1.5'} kg`, markup: product.markup15kg ?? 1800.00 },
+    { label: `${product.kg3 ?? '2.0'} kg`, markup: product.markup20kg ?? 3600.00 }
   ];
 
   // Calculate dynamic price based on chosen size

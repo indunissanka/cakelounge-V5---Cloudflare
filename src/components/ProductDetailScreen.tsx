@@ -49,11 +49,16 @@ export default function ProductDetailScreen({ products, productId, onBackToStore
     { label: 'Box of 6', markup: 0 },
     { label: 'Box of 12', markup: 1800.00 },
     { label: 'Box of 24', markup: 3400.00 }
-  ] : [
-    { label: `${product.kg1 ?? '1.0'} kg (${product.servings ?? '6-8 Servings'})`, markup: 0 },
-    { label: `${product.kg2 ?? '1.5'} kg (${product.servings2 ?? '12-15 Servings'})`, markup: product.markup15kg ?? 1800.00 },
-    { label: `${product.kg3 ?? '2.0'} kg (${product.servings3 ?? '20-25 Servings'})`, markup: product.markup20kg ?? 3600.00 }
-  ];
+  ] : product.sizeTiers && product.sizeTiers.length > 0
+    ? product.sizeTiers.map(t => ({
+        label: `${t.kg} kg (${t.servings} Servings)`,
+        markup: t.price - product.price
+      }))
+    : [
+        { label: '1.0 kg (6-8 Servings)', markup: 0 },
+        { label: '1.5 kg (12-15 Servings)', markup: 1800 },
+        { label: '2.0 kg (20-25 Servings)', markup: 3600 }
+      ];
 
   // Calculate dynamic price based on chosen size
   const selectedSizeOption = sizeOptions.find(o => o.label === selectedSize) || sizeOptions[0];

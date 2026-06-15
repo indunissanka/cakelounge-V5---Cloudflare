@@ -10,15 +10,8 @@ export interface CakeProduct {
   category: string;
   tag?: string;
   tagType?: 'top-seller' | 'bakers-pick' | 'gluten-free';
-  servings?: string;
-  servings2?: string;
-  servings3?: string;
   weight?: string;
-  kg1?: string;
-  kg2?: string;
-  kg3?: string;
-  markup15kg?: number;
-  markup20kg?: number;
+  sizeTiers?: { kg: string; servings: string; price: number }[];
   allergens?: string[];
   longDescription?: string;
   galleryImages?: string[];

@@ -73,15 +73,8 @@ export default function AdminDashboard({
   const [prodLongDesc, setProdLongDesc] = useState('');
   const [prodImage, setProdImage] = useState('https://lh3.googleusercontent.com/aida-public/AB6AXuD9xg23JS1m4efL9471QbGoCMXQ8bREBf4rmiEUsiiZ1DtA43Izo8whF4OBWlboGEe0Aa3nnYVteJ1aCUP2zV93ExluaKODbXHiKA8BhHAmdoUj2vY0_5o0KZ8wbdna2iNNELxvWFBr-TtUjk6Ukonssn9vTtAXuDLIn4nkCgVdSc1eDXVO1DgztvyqYOmBpw3u37mCTHGXsIPPaDEXOedqHrdX9SRPk5gmo21sPXS7YJukfAPHw1Wp_-UpKUB8jY99nr8F4-dV4bU');
   const [prodTag, setProdTag] = useState('');
-  const [prodServings1, setProdServings1] = useState('6-8');
-  const [prodServings2, setProdServings2] = useState('12-15');
-  const [prodServings3, setProdServings3] = useState('20-25');
   const [prodWeight, setProdWeight] = useState('');
-  const [prodKg1, setProdKg1] = useState('1.0');
-  const [prodKg2, setProdKg2] = useState('1.5');
-  const [prodKg3, setProdKg3] = useState('2.0');
-  const [prodMarkup15, setProdMarkup15] = useState('1800');
-  const [prodMarkup20, setProdMarkup20] = useState('3600');
+  const [sizeTiers, setSizeTiers] = useState([{ kg: '1.0', servings: '6-8', price: '' }]);
   const [prodAllergens, setProdAllergens] = useState<string[]>([]);
 
   // Notification banner state
@@ -111,7 +104,8 @@ export default function AdminDashboard({
     e.preventDefault();
     if (!prodName.trim()) return;
 
-    const parsedPrice = parseFloat(prodPrice) || 3900.00;
+    const baseTier = sizeTiers[0];
+    const parsedPrice = parseFloat(baseTier?.price) || 3900;
     const generatedId = prodName.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-str0-9-]/g, '');
 
     const newProduct: CakeProduct = {
@@ -124,15 +118,8 @@ export default function AdminDashboard({
       category: prodCategory,
       tag: prodTag || undefined,
       tagType: prodTag === 'Top Seller' ? 'top-seller' : prodTag === "Baker's Pick" ? 'bakers-pick' : prodTag === "Gluten-Free" ? 'gluten-free' : undefined,
-      servings: prodServings1 ? `${prodServings1} Servings` : undefined,
-      servings2: prodServings2 ? `${prodServings2} Servings` : undefined,
-      servings3: prodServings3 ? `${prodServings3} Servings` : undefined,
       weight: prodWeight.trim() || undefined,
-      kg1: prodKg1 || '1.0',
-      kg2: prodKg2 || '1.5',
-      kg3: prodKg3 || '2.0',
-      markup15kg: parseFloat(prodMarkup15) || 1800,
-      markup20kg: parseFloat(prodMarkup20) || 3600,
+      sizeTiers: sizeTiers.map(t => ({ kg: t.kg, servings: t.servings, price: parseFloat(t.price) || parsedPrice })),
       allergens: prodAllergens.length > 0 ? prodAllergens : undefined,
       longDescription: prodLongDesc.trim() || undefined,
     };
@@ -151,15 +138,8 @@ export default function AdminDashboard({
     setProdDesc('');
     setProdLongDesc('');
     setProdTag('');
-    setProdServings1('6-8');
-    setProdServings2('12-15');
-    setProdServings3('20-25');
     setProdWeight('');
-    setProdKg1('1.0');
-    setProdKg2('1.5');
-    setProdKg3('2.0');
-    setProdMarkup15('1800');
-    setProdMarkup20('3600');
+    setSizeTiers([{ kg: '1.0', servings: '6-8', price: '' }]);
     setProdAllergens([]);
   };
 
@@ -174,15 +154,12 @@ export default function AdminDashboard({
     setProdLongDesc(product.longDescription || '');
     setProdImage(product.image);
     setProdTag(product.tag || '');
-    setProdServings1(product.servings?.replace(' Servings','') || '6-8');
-    setProdServings2(product.servings2?.replace(' Servings','') || '12-15');
-    setProdServings3(product.servings3?.replace(' Servings','') || '20-25');
     setProdWeight(product.weight || '');
-    setProdKg1(product.kg1 || '1.0');
-    setProdKg2(product.kg2 || '1.5');
-    setProdKg3(product.kg3 || '2.0');
-    setProdMarkup15(String(product.markup15kg ?? 1800));
-    setProdMarkup20(String(product.markup20kg ?? 3600));
+    setSizeTiers(
+      product.sizeTiers && product.sizeTiers.length > 0
+        ? product.sizeTiers.map(t => ({ kg: t.kg, servings: t.servings, price: String(t.price) }))
+        : [{ kg: '1.0', servings: '6-8', price: String(product.price) }]
+    );
     setProdAllergens(product.allergens || []);
     // Scroll to form
     document.getElementById('create-product-btn')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -933,61 +910,48 @@ export default function AdminDashboard({
                 </div>
               </div>
 
-              {/* Size Composition Tiers */}
+              {/* Size Composition Tiers — dynamic */}
               <div className="space-y-2">
                 <label className="block text-[10px] text-brand-primary font-bold uppercase tracking-wider">Size Composition & Pricing</label>
-                <div className="bg-brand-surface-low/40 border border-brand-outline-variant/20 rounded-xl p-3 space-y-2.5 text-[11px]">
-
+                <div className="bg-brand-surface-low/40 border border-brand-outline-variant/20 rounded-xl p-3 space-y-2 text-[11px]">
                   {/* Header */}
-                  <div className="flex items-center gap-3 text-[9px] uppercase tracking-wider text-brand-on-surface-variant/60 font-bold pb-1 border-b border-brand-outline-variant/15">
+                  <div className="flex items-center gap-2 text-[9px] uppercase tracking-wider text-brand-on-surface-variant/60 font-bold pb-1 border-b border-brand-outline-variant/15">
                     <span className="w-14 shrink-0">kg</span>
                     <span className="w-20 shrink-0">Servings</span>
-                    <span>Price (Rs.)</span>
-                    <span className="ml-auto">Total</span>
+                    <span className="flex-1">Price (Rs.)</span>
+                    <span className="w-24 text-right shrink-0">Total</span>
+                    <span className="w-5 shrink-0" />
                   </div>
 
-                  {/* Tier 1 — base */}
-                  <div className="flex items-center gap-3">
-                    <input type="number" step="0.1" min="0.1" value={prodKg1} onChange={(e) => setProdKg1(e.target.value)}
-                      className="w-14 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono shrink-0" />
-                    <input type="text" placeholder="e.g. 6-8" value={prodServings1} onChange={(e) => setProdServings1(e.target.value)}
-                      className="w-20 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs shrink-0" />
-                    <input type="number" min="1" step="1" required placeholder="3900" value={prodPrice} onChange={(e) => setProdPrice(e.target.value)}
-                      className="w-24 p-1.5 bg-white border border-brand-primary/40 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono" />
-                    <span className="ml-auto font-mono font-bold text-brand-primary shrink-0">Rs. {(parseFloat(prodPrice) || 0).toLocaleString()}</span>
-                  </div>
+                  {sizeTiers.map((tier, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <input type="number" step="0.1" min="0.1" value={tier.kg}
+                        onChange={e => setSizeTiers(prev => prev.map((t, j) => j === i ? { ...t, kg: e.target.value } : t))}
+                        className="w-14 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono shrink-0" />
+                      <input type="text" placeholder="e.g. 6-8" value={tier.servings}
+                        onChange={e => setSizeTiers(prev => prev.map((t, j) => j === i ? { ...t, servings: e.target.value } : t))}
+                        className="w-20 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs shrink-0" />
+                      <input type="number" min="0" step="1" required={i === 0} placeholder={i === 0 ? 'Base price' : 'Price'}
+                        value={tier.price}
+                        onChange={e => setSizeTiers(prev => prev.map((t, j) => j === i ? { ...t, price: e.target.value } : t))}
+                        className={`flex-1 p-1.5 bg-white border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono ${i === 0 ? 'border-brand-primary/40' : 'border-brand-outline-variant/30'}`} />
+                      <span className="w-24 text-right font-mono font-bold text-brand-primary shrink-0 text-[10px]">
+                        Rs. {(parseFloat(tier.price) || 0).toLocaleString()}
+                      </span>
+                      {i > 0 ? (
+                        <button type="button" onClick={() => setSizeTiers(prev => prev.filter((_, j) => j !== i))}
+                          className="w-5 h-5 flex items-center justify-center text-red-400 hover:text-red-600 shrink-0 cursor-pointer">
+                          ×
+                        </button>
+                      ) : <span className="w-5 shrink-0" />}
+                    </div>
+                  ))}
 
-                  {/* Tier 2 */}
-                  <div className="flex items-center gap-3">
-                    <input type="number" step="0.1" min="0.1" value={prodKg2} onChange={(e) => setProdKg2(e.target.value)}
-                      className="w-14 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono shrink-0" />
-                    <input type="text" placeholder="e.g. 12-15" value={prodServings2} onChange={(e) => setProdServings2(e.target.value)}
-                      className="w-20 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs shrink-0" />
-                    <input type="number" min="0" step="1" placeholder="+markup" value={prodMarkup15} onChange={(e) => setProdMarkup15(e.target.value)}
-                      className="w-24 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono" />
-                    <span className="ml-auto font-mono font-bold text-brand-primary shrink-0">Rs. {((parseFloat(prodPrice)||0)+(parseFloat(prodMarkup15)||0)).toLocaleString()}</span>
-                  </div>
-
-                  {/* Tier 3 */}
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="number" step="0.1" min="0.1"
-                      value={prodKg3}
-                      onChange={(e) => setProdKg3(e.target.value)}
-                      className="w-14 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono"
-                    />
-                    <span className="text-brand-on-surface-variant shrink-0">kg +Rs.</span>
-                    <input
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={prodMarkup20}
-                      onChange={(e) => setProdMarkup20(e.target.value)}
-                      className="w-24 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono"
-                    />
-                    <span className="ml-auto font-mono font-bold text-brand-primary">= Rs. {((parseFloat(prodPrice) || 0) + (parseFloat(prodMarkup20) || 0)).toLocaleString()}</span>
-                  </div>
-
+                  <button type="button"
+                    onClick={() => setSizeTiers(prev => [...prev, { kg: '', servings: '', price: '' }])}
+                    className="mt-1 flex items-center gap-1 text-[10px] font-bold text-brand-primary hover:text-brand-primary/70 cursor-pointer transition-colors">
+                    <Plus className="w-3.5 h-3.5" /> Add Size
+                  </button>
                 </div>
               </div>
 
@@ -1060,9 +1024,7 @@ export default function AdminDashboard({
                     onClick={() => {
                       setEditingProductId(null);
                       setProdName(''); setProdDesc(''); setProdLongDesc(''); setProdTag('');
-                      setProdServings1('6-8'); setProdServings2('12-15'); setProdServings3('20-25'); setProdWeight('');
-                      setProdKg1('1.0'); setProdKg2('1.5'); setProdKg3('2.0');
-                      setProdMarkup15('1800'); setProdMarkup20('3600'); setProdAllergens([]);
+                      setProdWeight(''); setSizeTiers([{ kg: '1.0', servings: '6-8', price: '' }]); setProdAllergens([]);
                       setProdPrice('3900');
                     }}
                     className="py-3.5 px-5 border border-brand-outline-variant/30 text-brand-on-surface-variant hover:bg-brand-surface-low font-bold text-xs tracking-wider uppercase rounded-xl transition-all cursor-pointer"

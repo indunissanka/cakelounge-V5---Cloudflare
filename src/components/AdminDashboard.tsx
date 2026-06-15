@@ -846,32 +846,17 @@ export default function AdminDashboard({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="block text-[10px] text-brand-primary font-bold uppercase tracking-wider">Category *</label>
-                  <select
-                    value={prodCategory}
-                    onChange={(e) => setProdCategory(e.target.value)}
-                    className="w-full p-2.5 bg-white border border-brand-outline-variant/30 rounded-xl focus:outline-none text-xs"
-                  >
-                    <option value="Cakes">Cakes</option>
-                    <option value="Collections">Collections</option>
-                    <option value="Gifts">Gifting & Boxes</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="block text-[10px] text-brand-primary font-bold uppercase tracking-wider">Base Price (Rs.) *</label>
-                  <input
-                    type="number"
-                    step="1"
-                    min="1"
-                    required
-                    value={prodPrice}
-                    onChange={(e) => setProdPrice(e.target.value)}
-                    className="w-full p-2.5 bg-white border border-brand-outline-variant/30 rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs"
-                  />
-                </div>
+              <div className="space-y-1.5">
+                <label className="block text-[10px] text-brand-primary font-bold uppercase tracking-wider">Category *</label>
+                <select
+                  value={prodCategory}
+                  onChange={(e) => setProdCategory(e.target.value)}
+                  className="w-full p-2.5 bg-white border border-brand-outline-variant/30 rounded-xl focus:outline-none text-xs"
+                >
+                  <option value="Cakes">Cakes</option>
+                  <option value="Collections">Collections</option>
+                  <option value="Gifts">Gifting & Boxes</option>
+                </select>
               </div>
 
               <div className="space-y-1.5">
@@ -936,8 +921,18 @@ export default function AdminDashboard({
                   {/* Tier 1 — 1.0 kg (base) */}
                   <div className="flex items-center gap-3">
                     <span className="w-32 font-bold text-brand-on-surface shrink-0">1.0 kg (6–8 Servings)</span>
-                    <span className="text-brand-on-surface-variant shrink-0">Base Price</span>
-                    <span className="ml-auto font-mono font-bold text-brand-primary">Rs. {(parseFloat(prodPrice) || 0).toLocaleString()}</span>
+                    <span className="text-brand-on-surface-variant shrink-0">Rs.</span>
+                    <input
+                      type="number"
+                      min="1"
+                      step="100"
+                      required
+                      placeholder="e.g. 3900"
+                      value={prodPrice}
+                      onChange={(e) => setProdPrice(e.target.value)}
+                      className="w-24 p-1.5 bg-white border border-brand-primary/40 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono"
+                    />
+                    <span className="ml-auto font-mono font-bold text-brand-primary">= Rs. {(parseFloat(prodPrice) || 0).toLocaleString()}</span>
                   </div>
 
                   {/* Tier 2 — 1.5 kg */}

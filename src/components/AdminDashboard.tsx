@@ -23,6 +23,42 @@ function statusColor(s: OrderStatus): string {
   return map[s] ?? '#888';
 }
 
+function TaxRateSetting({ triggerNotification }: { triggerNotification: (msg: string, type: 'success' | 'info' | 'error') => void }) {
+  const [rate, setRate] = useState(() => localStorage.getItem('cake_tax_rate') || '9');
+
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    const val = parseFloat(rate);
+    if (isNaN(val) || val < 0 || val > 100) {
+      triggerNotification('Enter a valid rate between 0 and 100.', 'error');
+      return;
+    }
+    localStorage.setItem('cake_tax_rate', String(val));
+    triggerNotification(`Tax rate updated to ${val}%.`, 'success');
+  };
+
+  return (
+    <form onSubmit={handleSave} className="flex items-end gap-3">
+      <div className="flex-1 space-y-1.5">
+        <label className="block text-xs font-bold text-brand-on-surface/85 uppercase tracking-wider">Rate (%)</label>
+        <div className="relative">
+          <input
+            type="number" min="0" max="100" step="0.1"
+            value={rate}
+            onChange={e => setRate(e.target.value)}
+            className="w-full px-4 py-3 bg-brand-surface rounded-xl border border-brand-outline-variant/20 focus:border-brand-primary focus:outline-none text-sm font-mono"
+          />
+          <span className="absolute right-4 top-3 text-brand-on-surface-variant text-sm font-bold">%</span>
+        </div>
+        <p className="text-[10px] text-brand-on-surface-variant">Applied to all customer checkouts. Current: {parseFloat(localStorage.getItem('cake_tax_rate') || '9')}%</p>
+      </div>
+      <button type="submit" className="px-5 py-3 bg-brand-primary text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:brightness-105 transition-all mb-5 cursor-pointer">
+        Save
+      </button>
+    </form>
+  );
+}
+
 export default function AdminDashboard({ 
   orders, 
   setOrders, 
@@ -1046,7 +1082,17 @@ export default function AdminDashboard({
       )}
 
       {activeMenu === 'settings' && (
-        <div className="max-w-md">
+        <div className="max-w-md space-y-4">
+
+          {/* Tax Rate */}
+          <div className="bg-white rounded-2xl border border-brand-outline-variant/15 p-6 shadow-sm space-y-4">
+            <div className="flex items-center gap-2 pb-3 border-b border-brand-outline-variant/15">
+              <Award className="w-5 h-5 text-brand-primary" />
+              <h3 className="font-serif text-base font-semibold text-brand-on-surface">Tax Rate</h3>
+            </div>
+            <TaxRateSetting triggerNotification={triggerNotification} />
+          </div>
+
           <div className="bg-white rounded-2xl border border-brand-outline-variant/15 p-6 shadow-sm space-y-5">
             <div className="flex items-center gap-2 pb-3 border-b border-brand-outline-variant/15">
               <KeyRound className="w-5 h-5 text-brand-primary" />
@@ -1080,6 +1126,7 @@ export default function AdminDashboard({
               </button>
             </form>
           </div>
+
         </div>
       )}
 

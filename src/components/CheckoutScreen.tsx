@@ -102,9 +102,10 @@ export default function CheckoutScreen({ cart, onPlaceOrder, onBackToStore, curr
   const subtotal = cart.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
   const deliveryFee = subtotal > 10000 ? 0 : 750.00; // Free delivery over Rs. 10,000
   
+  const taxRate = parseFloat(localStorage.getItem('cake_tax_rate') || '9') / 100;
   const discountAmount = discountApplied ? (subtotal * discountPercent) : 0;
   const taxableAmount = subtotal - discountAmount;
-  const tax = taxableAmount * 0.09; // 9% luxury pastry tax
+  const tax = taxableAmount * taxRate;
   const total = taxableAmount + deliveryFee + tax;
 
   const handleApplyPromo = (e: React.FormEvent) => {
@@ -450,7 +451,7 @@ export default function CheckoutScreen({ cart, onPlaceOrder, onBackToStore, curr
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Luxury tax (9% VAT)</span>
+                  <span>Tax ({Math.round(taxRate * 100)}% VAT)</span>
                   <span className="font-mono text-xs">Rs. {tax.toLocaleString()}</span>
                 </div>
                 

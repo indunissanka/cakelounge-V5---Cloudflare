@@ -952,7 +952,7 @@ export default function AdminDashboard({
                       className="w-14 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono shrink-0" />
                     <input type="text" placeholder="e.g. 6-8" value={prodServings1} onChange={(e) => setProdServings1(e.target.value)}
                       className="w-20 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs shrink-0" />
-                    <input type="number" min="1" step="100" required placeholder="3900" value={prodPrice} onChange={(e) => setProdPrice(e.target.value)}
+                    <input type="number" min="1" step="1" required placeholder="3900" value={prodPrice} onChange={(e) => setProdPrice(e.target.value)}
                       className="w-24 p-1.5 bg-white border border-brand-primary/40 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono" />
                     <span className="ml-auto font-mono font-bold text-brand-primary shrink-0">Rs. {(parseFloat(prodPrice) || 0).toLocaleString()}</span>
                   </div>
@@ -963,7 +963,7 @@ export default function AdminDashboard({
                       className="w-14 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono shrink-0" />
                     <input type="text" placeholder="e.g. 12-15" value={prodServings2} onChange={(e) => setProdServings2(e.target.value)}
                       className="w-20 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs shrink-0" />
-                    <input type="number" min="0" step="100" placeholder="+markup" value={prodMarkup15} onChange={(e) => setProdMarkup15(e.target.value)}
+                    <input type="number" min="0" step="1" placeholder="+markup" value={prodMarkup15} onChange={(e) => setProdMarkup15(e.target.value)}
                       className="w-24 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono" />
                     <span className="ml-auto font-mono font-bold text-brand-primary shrink-0">Rs. {((parseFloat(prodPrice)||0)+(parseFloat(prodMarkup15)||0)).toLocaleString()}</span>
                   </div>
@@ -980,7 +980,7 @@ export default function AdminDashboard({
                     <input
                       type="number"
                       min="0"
-                      step="100"
+                      step="1"
                       value={prodMarkup20}
                       onChange={(e) => setProdMarkup20(e.target.value)}
                       className="w-24 p-1.5 bg-white border border-brand-outline-variant/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-primary text-xs font-mono"

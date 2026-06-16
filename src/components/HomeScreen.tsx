@@ -257,6 +257,56 @@ export default function HomeScreen({ products, onSelectCake, setCurrentTab }: Ho
         </div>
       </section>
 
+      {/* COLLECTIONS & GIFTS SECTION */}
+      {collectionsList.length > 0 && (
+        <section className="w-full px-5 md:px-[64px] max-w-[1280px] mx-auto">
+          <div className="space-y-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 border-b border-brand-outline-variant/15 pb-6">
+              <div className="space-y-1">
+                <span className="text-brand-primary text-xs font-bold tracking-widest uppercase block">Curated Selection</span>
+                <h2 className="font-serif text-2xl md:text-3xl font-semibold text-brand-on-surface">Collections & Gifts</h2>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {collectionsList.map((item) => (
+                <div
+                  key={item.id}
+                  onClick={() => handleProductClick(item.id)}
+                  className="group bg-white rounded-2xl overflow-hidden border border-brand-outline-variant/10 hover:border-brand-primary/20 transition-all duration-300 hover:shadow-md cursor-pointer flex flex-col h-full"
+                >
+                  <div className="relative aspect-square overflow-hidden bg-brand-surface-low">
+                    <img src={item.image} referrerPolicy="no-referrer" alt={item.alt}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    {item.tag && (
+                      <span className={`absolute top-4 left-4 text-[9px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-sm text-white ${
+                        item.tagType === 'top-seller' ? 'bg-brand-primary-container' :
+                        item.tagType === 'bakers-pick' ? 'bg-brand-primary' : 'bg-brand-secondary'
+                      }`}>{item.tag}</span>
+                    )}
+                    <div className="absolute inset-0 bg-brand-primary/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <span className="bg-white/90 backdrop-blur-sm text-brand-primary font-bold text-xs px-4 py-2 rounded-full tracking-wider shadow-sm transition-transform scale-90 group-hover:scale-100">
+                        Configure Masterpiece
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                    <div className="space-y-1.5">
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-brand-secondary">{item.category}</span>
+                      <h3 className="font-serif text-lg font-semibold text-brand-on-surface group-hover:text-brand-primary transition-colors">{item.name}</h3>
+                      <p className="text-brand-on-surface-variant text-xs line-clamp-2 md:line-clamp-3 font-medium leading-relaxed">{item.description}</p>
+                    </div>
+                    <div className="flex justify-between items-center pt-2 border-t border-brand-surface-low">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-brand-secondary">Starting price</span>
+                      <span className="font-serif font-bold text-brand-primary text-base">Rs. {item.price.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* 4. THE ARTISAN PROCESS SECTION (Hands of master chef) */}
       <section className="w-full px-5 md:px-[64px] max-w-[1280px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-[#fdfaf8] rounded-2xl p-6 md:p-12 border border-brand-outline-variant/15">

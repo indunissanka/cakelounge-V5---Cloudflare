@@ -104,7 +104,7 @@ export default function AdminDashboard({
   // New product inputs state list
   const [prodName, setProdName] = useState('');
   const [prodCategory, setProdCategory] = useState('Cakes');
-  const [prodPrice, setProdPrice] = useState('3900');
+
   const [prodDesc, setProdDesc] = useState('');
   const [prodLongDesc, setProdLongDesc] = useState('');
   const [prodImage, setProdImage] = useState('https://lh3.googleusercontent.com/aida-public/AB6AXuD9xg23JS1m4efL9471QbGoCMXQ8bREBf4rmiEUsiiZ1DtA43Izo8whF4OBWlboGEe0Aa3nnYVteJ1aCUP2zV93ExluaKODbXHiKA8BhHAmdoUj2vY0_5o0KZ8wbdna2iNNELxvWFBr-TtUjk6Ukonssn9vTtAXuDLIn4nkCgVdSc1eDXVO1DgztvyqYOmBpw3u37mCTHGXsIPPaDEXOedqHrdX9SRPk5gmo21sPXS7YJukfAPHw1Wp_-UpKUB8jY99nr8F4-dV4bU');
@@ -141,7 +141,11 @@ export default function AdminDashboard({
     if (!prodName.trim()) return;
 
     const baseTier = sizeTiers[0];
-    const parsedPrice = parseFloat(baseTier?.price) || 3900;
+    const parsedPrice = parseFloat(baseTier?.price);
+    if (!parsedPrice || parsedPrice <= 0) {
+      triggerNotification('Please enter a base price for the first size tier.', 'error');
+      return;
+    }
     const generatedId = prodName.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-str0-9-]/g, '');
 
     const newProduct: CakeProduct = {
@@ -185,7 +189,6 @@ export default function AdminDashboard({
     setEditingProductId(product.id);
     setProdName(product.name);
     setProdCategory(product.category);
-    setProdPrice(String(product.price));
     setProdDesc(product.description);
     setProdLongDesc(product.longDescription || '');
     setProdImage(product.image);
@@ -1061,7 +1064,6 @@ export default function AdminDashboard({
                       setEditingProductId(null);
                       setProdName(''); setProdDesc(''); setProdLongDesc(''); setProdTag('');
                       setProdWeight(''); setSizeTiers([{ kg: '1.0', servings: '6-8', price: '' }]); setProdAllergens([]);
-                      setProdPrice('3900');
                     }}
                     className="py-3.5 px-5 border border-brand-outline-variant/30 text-brand-on-surface-variant hover:bg-brand-surface-low font-bold text-xs tracking-wider uppercase rounded-xl transition-all cursor-pointer"
                   >
